@@ -90,7 +90,7 @@ export default function Home() {
                 <CardContent className="p-0">
                   <div className="relative h-64 overflow-hidden">
                     <img
-                      src="/images/categories/sportswear-hero.png"
+                      src="/images/sportwer.jpeg"
                       alt="Sportswear"
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
@@ -110,7 +110,7 @@ export default function Home() {
                 <CardContent className="p-0">
                   <div className="relative h-64 overflow-hidden">
                     <img
-                      src="/images/categories/jewelry-hero.png"
+                      src="/images/jewel.png"
                       alt="Jewelry"
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />

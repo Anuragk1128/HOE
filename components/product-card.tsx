@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/contexts/cart-context"
 import { useCart } from "@/contexts/cart-context"
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   product: Product
@@ -15,7 +17,17 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
-  const { addItem } = useCart()
+  const { addItem } = useCart();
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleAddToCart = () => {
+    if (!user) {
+      router.push("/register");
+      return;
+    }
+    addItem(product);
+  };
 
   const formatPrice = (price: number) => {
     return `₹${price.toLocaleString()}`
@@ -59,7 +71,7 @@ export function ProductCard({ product }: ProductCardProps) {
               isHovered ? "opacity-100" : "opacity-0"
             }`}
           >
-            <Button onClick={() => addItem(product)} className="w-full" size="sm">
+            <Button onClick={handleAddToCart} className="w-full" size="sm">
               <ShoppingBag className="mr-2 h-4 w-4" />
               Add to Cart
             </Button>

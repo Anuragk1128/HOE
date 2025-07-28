@@ -7,13 +7,25 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { useCart } from "@/contexts/cart-context"
 import Link from "next/link"
+import { useAuth } from "@/contexts/auth-context";
 
 export function CartSidebar() {
   const { state, removeItem, updateQuantity, setCartOpen, totalPrice } = useCart()
+  const { user } = useAuth();
 
   const formatPrice = (price: number) => {
     return `₹${price.toLocaleString()}`
   }
+
+  const handleCheckout = () => {
+    setCartOpen(false);
+    if (!user) {
+      // Redirect to login if not authenticated
+      window.location.href = '/login';
+      return;
+    }
+    // Just close cart and let checkout page handle the order
+  };
 
   return (
     <Sheet open={state.isOpen} onOpenChange={setCartOpen}>
@@ -100,7 +112,7 @@ export function CartSidebar() {
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
               </div>
-              <Button asChild className="w-full" onClick={() => setCartOpen(false)}>
+              <Button asChild className="w-full" onClick={handleCheckout}>
                 <Link href="/checkout">Proceed to Checkout</Link>
               </Button>
             </div>

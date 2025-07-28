@@ -16,12 +16,12 @@ const categoryInfo = {
     title: "Jewelry Collection",
     description:
       "Discover our ethically crafted jewelry collection featuring sustainable materials and timeless designs.",
-    image: "/images/categories/jewelry-hero.png",
+    image: "/images/jwl.jpeg",
   },
   sportswear: {
     title: "Sportswear Collection",
     description: "Sustainable athletic wear designed for performance and comfort, made from eco-friendly materials.",
-    image: "/images/categories/sportswear-hero.png",
+    image: "/images/sprtwer.jpeg",
   },
 }
 
