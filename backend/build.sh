@@ -2,8 +2,16 @@
 
 echo "🚀 Starting build process..."
 
-# Install dependencies
-echo "📦 Installing dependencies..."
+# Ensure we're using npm
+echo "📦 Ensuring npm is used..."
+npm --version
+
+# Clear any existing node_modules
+echo "🧹 Cleaning previous installation..."
+rm -rf node_modules package-lock.json
+
+# Install dependencies with npm
+echo "📦 Installing dependencies with npm..."
 npm install
 
 # Check if installation was successful
@@ -14,7 +22,7 @@ else
     exit 1
 fi
 
-# Create a simple build completion marker
+# Create a build completion marker
 echo "Build completed at $(date)" > build-complete.txt
 
 echo "✅ Build process completed successfully!" 

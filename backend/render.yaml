@@ -3,7 +3,7 @@ services:
     name: house-of-evolve-backend
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm start
     rootDir: backend
     envVars:
