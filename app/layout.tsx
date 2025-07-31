@@ -12,7 +12,12 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 export const metadata: Metadata = {
   title: "House of Evolve - Sustainable Lifestyle Brand",
   description: "Modern lifestyle brand committed to sustainability, conscious living, and minimalist elegance.",
-    generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: '/images/icons/logo.png',
+    shortcut: '/images/icons/logo.png',
+    apple: '/images/icons/logo.png',
+  },
 }
 
 export default function RootLayout({
