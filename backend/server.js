@@ -6,6 +6,7 @@ import connectDB from "./config/mongodb.js";
 import userRouter from "./routes/userRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import adminProductRouter from "./routes/adminProductRoute.js";
+import productRouter from "./routes/productRoute.js";
 import specs from "./swagger.js";
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/admin", adminProductRouter);
+app.use("/api", productRouter);
 
 app.get("/", (req, res) => {
     res.send("Api is working");

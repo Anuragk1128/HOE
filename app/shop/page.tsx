@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
@@ -8,47 +8,56 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Search } from "lucide-react"
-import { products } from "@/lib/products"
+import { Search, Loader2 } from "lucide-react"
+import { getProductsWithFilters } from "@/lib/products-service"
+import type { Product } from "@/contexts/cart-context"
 
 export default function Shop() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState("name")
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const categories = ["all", "jewelry", "sportswear"]
+  const categories = ["all", "jewellery", "sportswear"]
 
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products
-
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description?.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    }
-
-    // Filter by category
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((product) => product.category === selectedCategory)
-    }
-
-    // Sort products
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "price-low":
-          return a.price - b.price
-        case "price-high":
-          return b.price - a.price
-        case "name":
-        default:
-          return a.name.localeCompare(b.name)
+  // Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        setError("")
+        
+        const params: {
+          category?: string;
+          search?: string;
+          sort?: string;
+        } = {}
+        
+        if (selectedCategory !== "all") {
+          params.category = selectedCategory
+        }
+        
+        if (searchQuery) {
+          params.search = searchQuery
+        }
+        
+        if (sortBy) {
+          params.sort = sortBy
+        }
+        
+        const fetchedProducts = await getProductsWithFilters(params)
+        setProducts(fetchedProducts)
+      } catch (error) {
+        console.error("Error fetching products:", error)
+        setError("Failed to load products. Please try again.")
+      } finally {
+        setLoading(false)
       }
-    })
+    }
 
-    return filtered
+    fetchProducts()
   }, [searchQuery, selectedCategory, sortBy])
 
   return (
@@ -125,18 +134,46 @@ export default function Shop() {
           {/* Results Count */}
           <div className="mb-6">
             <p className="text-sm text-muted-foreground">
-              Showing {filteredAndSortedProducts.length} of {products.length} products
+              Showing {products.length} products
             </p>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <span className="ml-2 text-lg">Loading products...</span>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="text-center py-12">
+              <p className="text-lg font-medium mb-2 text-red-600">Error loading products</p>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button
+                onClick={() => {
+                  setSearchQuery("")
+                  setSelectedCategory("all")
+                  setSortBy("name")
+                }}
+              >
+                Try Again
+              </Button>
+            </div>
+          )}
+
           {/* Products Grid */}
-          {filteredAndSortedProducts.length > 0 ? (
+          {!loading && !error && products.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredAndSortedProducts.map((product) => (
+              {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-          ) : (
+          )}
+
+          {/* No Products State */}
+          {!loading && !error && products.length === 0 && (
             <div className="text-center py-12">
               <p className="text-lg font-medium mb-2">No products found</p>
               <p className="text-muted-foreground mb-4">Try adjusting your search or filter criteria</p>
@@ -144,6 +181,7 @@ export default function Shop() {
                 onClick={() => {
                   setSearchQuery("")
                   setSelectedCategory("all")
+                  setSortBy("name")
                 }}
               >
                 Clear Filters

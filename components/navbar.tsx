@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/auth-context";
 
 const categories = [
   { name: "All Products", path: "/shop" },
-  { name: "Jewelry", path: "/category/jewelry" },
+          { name: "Jewelry", path: "/category/jewellery" },
   { name: "Sportswear", path: "/category/sportswear" },
 ]
 

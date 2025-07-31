@@ -1,9 +1,13 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { notFound } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
 import { Badge } from "@/components/ui/badge"
-import { getProductsByCategory } from "@/lib/products"
+import { fetchProductsByCategory } from "@/lib/products-service"
+import type { Product } from "@/contexts/cart-context"
 
 interface CategoryPageProps {
   params: {
@@ -12,7 +16,7 @@ interface CategoryPageProps {
 }
 
 const categoryInfo = {
-  jewelry: {
+  jewellery: {
     title: "Jewelry Collection",
     description:
       "Discover our ethically crafted jewelry collection featuring sustainable materials and timeless designs.",
@@ -27,13 +31,34 @@ const categoryInfo = {
 
 export default function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   if (!categoryInfo[category as keyof typeof categoryInfo]) {
     notFound()
   }
 
-  const products = getProductsByCategory(category)
   const info = categoryInfo[category as keyof typeof categoryInfo]
+
+  // Fetch products for this category
+  useEffect(() => {
+    const loadCategoryProducts = async () => {
+      try {
+        setLoading(true)
+        setError("")
+        const categoryProducts = await fetchProductsByCategory(category)
+        setProducts(categoryProducts)
+      } catch (error) {
+        console.error("Error loading category products:", error)
+        setError("Failed to load products for this category")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadCategoryProducts()
+  }, [category])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -66,9 +91,19 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               </div>
             </div>
 
-            {products.length > 0 ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-2">Loading products...</span>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-lg font-medium mb-2 text-red-600">Error loading products</p>
+                <p className="text-muted-foreground">{error}</p>
+              </div>
+            ) : products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => (
+                {products.map((product: Product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -91,7 +126,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Premium Quality</h3>
                 <p className="text-muted-foreground">
-                  {category === "jewelry"
+                  {category === "jewellery"
                     ? "Handcrafted with the finest sustainable materials"
                     : "High-performance fabrics designed for active lifestyles"}
                 </p>
@@ -103,7 +138,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Sustainable</h3>
                 <p className="text-muted-foreground">
-                  {category === "jewelry"
+                  {category === "jewellery"
                     ? "Ethically sourced materials and responsible production"
                     : "Made from recycled and organic materials"}
                 </p>
@@ -115,7 +150,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Timeless Design</h3>
                 <p className="text-muted-foreground">
-                  {category === "jewelry"
+                  {category === "jewellery"
                     ? "Classic pieces that never go out of style"
                     : "Versatile designs for both workout and casual wear"}
                 </p>

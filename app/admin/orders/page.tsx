@@ -172,17 +172,17 @@ export default function AdminOrdersPage() {
                       }`}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
-                      <select
-                        value={order.status}
-                        onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                    <select
+                      value={order.status}
+                      onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                         className="text-xs border border-gray-300 rounded px-1 py-1"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="processing">Processing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -223,17 +223,17 @@ export default function AdminOrdersPage() {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="font-medium text-gray-900 mb-3">Order Information</h4>
                     <div className="space-y-2">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Order ID</label>
-                        <p className="text-sm text-gray-900">#{selectedOrder.orderId}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Date</label>
-                        <p className="text-sm text-gray-900">
-                          {new Date(selectedOrder.date).toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Order ID</label>
+                  <p className="text-sm text-gray-900">#{selectedOrder.orderId}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Date</label>
+                  <p className="text-sm text-gray-900">
+                    {new Date(selectedOrder.date).toLocaleString()}
+                  </p>
+                </div>
+                <div>
                         <label className="text-sm font-medium text-gray-700">Status</label>
                         <p className="text-sm text-gray-900 capitalize">{selectedOrder.status}</p>
                       </div>
@@ -298,8 +298,8 @@ export default function AdminOrdersPage() {
                           <div className="text-sm text-gray-900">
                             ₹{item.price}
                           </div>
-                        </div>
-                      ))}
+                      </div>
+                    ))}
                     </div>
                   </div>
                 </div>

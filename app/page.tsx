@@ -7,12 +7,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ProductCard } from "@/components/product-card"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { products } from "@/lib/products"
+import { fetchProducts } from "@/lib/products-service"
+import type { Product } from "@/contexts/cart-context"
 
 export default function Home() {
   const [scrollY, setScrollY] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
-  const featuredProducts = products.slice(0, 4)
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Trigger fade-in animation after component mounts
@@ -22,6 +24,24 @@ export default function Home() {
     const handleScroll = () => setScrollY(window.scrollY)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Fetch featured products
+  useEffect(() => {
+    const loadFeaturedProducts = async () => {
+      try {
+        setLoading(true)
+        const allProducts = await fetchProducts()
+        // Get first 4 products as featured
+        setFeaturedProducts(allProducts.slice(0, 4))
+      } catch (error) {
+        console.error("Error loading featured products:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadFeaturedProducts()
   }, [])
 
   return (
@@ -106,7 +126,7 @@ export default function Home() {
             </Card>
 
             <Card className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg">
-              <Link href="/category/jewelry">
+              <Link href="/category/jewellery">
                 <CardContent className="p-0">
                   <div className="relative h-64 overflow-hidden">
                     <img
@@ -138,11 +158,22 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-2">Loading featured products...</span>
+            </div>
+          ) : featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {featuredProducts.map((product: Product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No products available at the moment.</p>
+            </div>
+          )}
 
           <div className="text-center">
             <Button asChild variant="outline" size="lg">

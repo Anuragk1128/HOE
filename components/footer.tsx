@@ -21,9 +21,9 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/category/jewelry" className="opacity-90 hover:opacity-100">
-                  Jewelry
-                </Link>
+                            <Link href="/category/jewellery" className="opacity-90 hover:opacity-100">
+              Jewelry
+            </Link>
               </li>
               <li>
                 <Link href="/category/sportswear" className="opacity-90 hover:opacity-100">
