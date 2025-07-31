@@ -10,7 +10,8 @@ import {
   Plus, 
   LogOut,
   BarChart3,
-  Settings
+  Settings,
+  Image
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -123,6 +124,7 @@ export default function AdminLayout({
     { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
     { name: "Products", href: "/admin/products", icon: Package },
     { name: "Add Product", href: "/admin/products/add", icon: Plus },
+    { name: "Website Images", href: "/admin/images", icon: Image },
     { name: "Shipping", href: "/admin/shipping", icon: Truck },
   ];
 

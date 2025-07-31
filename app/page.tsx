@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/product-card"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { fetchProducts } from "@/lib/products-service"
+import { getHeroImage, getCategoryImage } from "@/lib/website-images-service"
 import type { Product } from "@/contexts/cart-context"
 
 export default function Home() {
@@ -15,6 +16,9 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [heroImage, setHeroImage] = useState("/images/hero-bg.png")
+  const [sportswearImage, setSportswearImage] = useState("/images/sportwer.jpeg")
+  const [jewelryImage, setJewelryImage] = useState("/images/jewel.png")
 
   useEffect(() => {
     // Trigger fade-in animation after component mounts
@@ -26,22 +30,35 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Fetch featured products
+  // Fetch featured products and images
   useEffect(() => {
-    const loadFeaturedProducts = async () => {
+    const loadData = async () => {
       try {
         setLoading(true)
+        
+        // Fetch products
         const allProducts = await fetchProducts()
-        // Get first 4 products as featured
         setFeaturedProducts(allProducts.slice(0, 4))
+        
+        // Fetch images
+        const [hero, sportswear, jewelry] = await Promise.all([
+          getHeroImage(),
+          getCategoryImage("sportswear"),
+          getCategoryImage("jewellery")
+        ]);
+        
+        if (hero) setHeroImage(hero.imageUrl);
+        if (sportswear) setSportswearImage(sportswear.imageUrl);
+        if (jewelry) setJewelryImage(jewelry.imageUrl);
+        
       } catch (error) {
-        console.error("Error loading featured products:", error)
+        console.error("Error loading data:", error)
       } finally {
         setLoading(false)
       }
     }
 
-    loadFeaturedProducts()
+    loadData()
   }, [])
 
   return (
@@ -57,7 +74,7 @@ export default function Home() {
           }}
         >
           <img
-            src="/images/hero-bg.png"
+            src={heroImage}
             alt="House of Evolve Hero"
             className="h-[120%] w-full object-cover scale-110"
           />
@@ -110,7 +127,7 @@ export default function Home() {
                 <CardContent className="p-0">
                   <div className="relative h-64 overflow-hidden">
                     <img
-                      src="/images/sportwer.jpeg"
+                      src={sportswearImage}
                       alt="Sportswear"
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
@@ -130,7 +147,7 @@ export default function Home() {
                 <CardContent className="p-0">
                   <div className="relative h-64 overflow-hidden">
                     <img
-                      src="/images/jewel.png"
+                      src={jewelryImage}
                       alt="Jewelry"
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />

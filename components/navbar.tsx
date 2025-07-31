@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Search, ShoppingBag, Menu, X, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/contexts/cart-context"
 import { CartSidebar } from "@/components/cart-sidebar"
 import { useAuth } from "@/contexts/auth-context";
+import { getLogoImage } from "@/lib/website-images-service";
 
 const categories = [
   { name: "All Products", path: "/shop" },
@@ -21,8 +22,24 @@ const categories = [
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [logoImage, setLogoImage] = useState<string>("/images/icons/logo.png")
   const { totalItems, toggleCart } = useCart()
   const { user } = useAuth();
+
+  // Fetch logo image on component mount
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const logo = await getLogoImage();
+        if (logo) {
+          setLogoImage(logo.imageUrl);
+        }
+      } catch (error) {
+        console.error("Error fetching logo:", error);
+      }
+    };
+    fetchLogo();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,7 +55,7 @@ export function Navbar() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/images/icons/logo.png" alt="House of Evolve Logo" className="h-14 w-14 object-contain" />
+              <img src={logoImage} alt="House of Evolve Logo" className="h-14 w-14 object-contain" />
               <span className="font-playfair text-xl font-bold text-primary">House of Evolve</span>
             </Link>
 

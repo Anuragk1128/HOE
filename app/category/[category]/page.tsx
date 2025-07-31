@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
 import { Badge } from "@/components/ui/badge"
 import { fetchProductsByCategory } from "@/lib/products-service"
+import { getCategoryImage } from "@/lib/website-images-service"
 import type { Product } from "@/contexts/cart-context"
 
 interface CategoryPageProps {
@@ -34,6 +35,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [categoryImage, setCategoryImage] = useState("")
 
   if (!categoryInfo[category as keyof typeof categoryInfo]) {
     notFound()
@@ -41,23 +43,34 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
   const info = categoryInfo[category as keyof typeof categoryInfo]
 
-  // Fetch products for this category
+  // Fetch products and image for this category
   useEffect(() => {
-    const loadCategoryProducts = async () => {
+    const loadCategoryData = async () => {
       try {
         setLoading(true)
         setError("")
+        
+        // Fetch products
         const categoryProducts = await fetchProductsByCategory(category)
         setProducts(categoryProducts)
+        
+        // Fetch category image
+        const image = await getCategoryImage(category)
+        if (image) {
+          setCategoryImage(image.imageUrl)
+        } else {
+          // Fallback to hardcoded image
+          setCategoryImage(categoryInfo[category as keyof typeof categoryInfo]?.image || "/placeholder.svg")
+        }
       } catch (error) {
-        console.error("Error loading category products:", error)
+        console.error("Error loading category data:", error)
         setError("Failed to load products for this category")
       } finally {
         setLoading(false)
       }
     }
 
-    loadCategoryProducts()
+    loadCategoryData()
   }, [category])
 
   return (
@@ -68,7 +81,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         {/* Category Hero */}
         <section className="relative h-[40vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0">
-            <img src={info.image || "/placeholder.svg"} alt={info.title} className="h-full w-full object-cover" />
+            <img src={categoryImage || info.image || "/placeholder.svg"} alt={info.title} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-black/50" />
           </div>
           <div className="relative z-10 text-center text-white px-4">
