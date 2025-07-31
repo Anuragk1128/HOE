@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
+import { useRouter } from "next/navigation"
 
 interface User {
   _id: string
@@ -24,6 +25,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hoe.onrender.co
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     // Check if user is logged in on mount
@@ -100,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("token")
     localStorage.removeItem("user")
     setUser(null)
+    router.push("/")
   }
 
   return (
