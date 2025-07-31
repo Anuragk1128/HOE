@@ -9,22 +9,30 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const { register, loading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { register } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
+    setIsLoading(true);
     
-    const result = await register(name, email, password);
-    
-    if (result.success) {
-      setMessage(result.message);
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
-    } else {
-      setMessage(result.message);
+    try {
+      const success = await register(name, email, password);
+      
+      if (success) {
+        setMessage("Registration successful! Redirecting...");
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      } else {
+        setMessage("Registration failed. Please try again.");
+      }
+    } catch (error) {
+      setMessage("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -40,7 +48,7 @@ export default function RegisterPage() {
         <div className="bg-white/90 rounded-lg shadow-lg p-8 w-80 flex flex-col items-center">
           <h1 className="text-2xl font-bold mb-4">Register</h1>
           {message && (
-            <div className={`mb-4 p-2 rounded text-sm ${message.includes('successfully') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            <div className={`mb-4 p-2 rounded text-sm ${message.includes('successful') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
               {message}
             </div>
           )}
@@ -52,7 +60,7 @@ export default function RegisterPage() {
               onChange={e => setName(e.target.value)}
               className="border p-2 rounded"
               required
-              disabled={loading}
+              disabled={isLoading}
             />
             <input
               type="email"
@@ -61,7 +69,7 @@ export default function RegisterPage() {
               onChange={e => setEmail(e.target.value)}
               className="border p-2 rounded"
               required
-              disabled={loading}
+              disabled={isLoading}
             />
             <input
               type="password"
@@ -70,14 +78,14 @@ export default function RegisterPage() {
               onChange={e => setPassword(e.target.value)}
               className="border p-2 rounded"
               required
-              disabled={loading}
+              disabled={isLoading}
             />
             <button 
               type="submit" 
               className="bg-black text-white p-2 rounded disabled:opacity-50"
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? "Registering..." : "Register"}
+              {isLoading ? "Registering..." : "Register"}
             </button>
           </form>
           <p className="mt-4">

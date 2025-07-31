@@ -8,22 +8,30 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const { login, loading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
+    setIsLoading(true);
     
-    const result = await login(email, password);
-    
-    if (result.success) {
-      setMessage(result.message);
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
-    } else {
-      setMessage(result.message);
+    try {
+      const success = await login(email, password);
+      
+      if (success) {
+        setMessage("Login successful! Redirecting...");
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      } else {
+        setMessage("Invalid email or password. Please try again.");
+      }
+    } catch (error) {
+      setMessage("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -51,7 +59,7 @@ export default function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               className="border p-2 rounded"
               required
-              disabled={loading}
+              disabled={isLoading}
             />
             <input
               type="password"
@@ -60,14 +68,14 @@ export default function LoginPage() {
               onChange={e => setPassword(e.target.value)}
               className="border p-2 rounded"
               required
-              disabled={loading}
+              disabled={isLoading}
             />
             <button 
               type="submit" 
               className="bg-black text-white p-2 rounded disabled:opacity-50"
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? "Logging in..." : "Login"}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </form>
           <p className="mt-4">

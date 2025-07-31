@@ -14,6 +14,10 @@ const options = {
     },
     servers: [
       {
+        url: 'https://hoe.onrender.com',
+        description: 'Production server'
+      },
+      {
         url: 'http://localhost:5000',
         description: 'Development server'
       }

@@ -1,173 +1,139 @@
-"use client";
-import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getApiUrl } from "@/lib/api-config"
 
 export default function AdminLoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  })
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      setMessage("Please fill in all fields");
-      return;
-    }
-    
-    setMessage("");
-    setLoading(true);
-    
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+
     try {
-      const response = await fetch('http://localhost:5000/api/admin/login', {
-        method: 'POST',
+      const response = await fetch(getApiUrl("/admin/login"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
+        body: JSON.stringify(formData),
+      })
 
       if (response.ok) {
-        localStorage.setItem("adminToken", data.token);
-        setMessage("Login successful!");
-        setTimeout(() => {
-          router.push("/admin/dashboard");
-        }, 1000);
+        const data = await response.json()
+        localStorage.setItem("adminToken", data.token)
+        localStorage.setItem("adminUser", JSON.stringify(data.admin))
+        router.push("/admin/dashboard")
       } else {
-        setMessage(data.message || "Login failed");
+        const errorData = await response.json()
+        setError(errorData.message || "Login failed")
       }
     } catch (error) {
-      setMessage("Network error. Please check your connection and try again.");
+      setError("Network error. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!name || !email || !password) {
-      setMessage("Please fill in all fields");
-      return;
-    }
-    
-    if (password.length < 6) {
-      setMessage("Password must be at least 6 characters");
-      return;
-    }
-    
-    setMessage("");
-    setLoading(true);
-    
+  const handleRegister = async () => {
+    setLoading(true)
+    setError("")
+
     try {
-      const response = await fetch('http://localhost:5000/api/admin/register', {
-        method: 'POST',
+      const response = await fetch(getApiUrl("/admin/register"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await response.json();
+        body: JSON.stringify(formData),
+      })
 
       if (response.ok) {
-        localStorage.setItem("adminToken", data.token);
-        setMessage("Registration successful!");
-        setTimeout(() => {
-          router.push("/admin/dashboard");
-        }, 1000);
+        const data = await response.json()
+        localStorage.setItem("adminToken", data.token)
+        localStorage.setItem("adminUser", JSON.stringify(data.admin))
+        router.push("/admin/dashboard")
       } else {
-        setMessage(data.message || "Registration failed");
+        const errorData = await response.json()
+        setError(errorData.message || "Registration failed")
       }
     } catch (error) {
-      setMessage("Network error. Please check your connection and try again.");
+      setError("Network error. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-
-  const handleSubmit = isLogin ? handleLogin : handleSignup;
+  }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center">
-      <img
-        src="/images/hero-bg.png"
-        alt="Hero Background"
-        className="absolute inset-0 w-full h-full object-cover z-0"
-      />
-      <div className="absolute inset-0 bg-black/50 z-10" />
-      <div className="relative z-20 flex flex-col items-center justify-center min-h-screen">
-        <div className="bg-white/90 rounded-lg shadow-lg p-8 w-80 flex flex-col items-center">
-          <h1 className="text-2xl font-bold mb-4">Admin {isLogin ? 'Login' : 'Signup'}</h1>
-          {message && (
-            <div className={`mb-4 p-2 rounded text-sm ${message.includes('successful') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-              {message}
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
-            {!isLogin && (
-              <input
-                type="text"
-                placeholder="Admin Name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="border p-2 rounded"
-                required={!isLogin}
-                disabled={loading}
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardDescription>
+            Enter your credentials to access the admin panel
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                required
+              />
+            </div>
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
             )}
-            <input
-              type="email"
-              placeholder="Admin Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="border p-2 rounded"
-              required
-              disabled={loading}
-            />
-            <input
-              type="password"
-              placeholder="Admin Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="border p-2 rounded"
-              required
-              disabled={loading}
-            />
-            <button 
-              type="submit" 
-              className="bg-black text-white p-2 rounded disabled:opacity-50"
-              disabled={loading}
-            >
-              {loading ? (isLogin ? "Logging in..." : "Registering...") : (isLogin ? "Login" : "Signup")}
-            </button>
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={loading}
+              >
+                {loading ? "Logging in..." : "Login"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleRegister}
+                disabled={loading}
+              >
+                {loading ? "Registering..." : "Register"}
+              </Button>
+            </div>
           </form>
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setMessage("");
-                setEmail("");
-                setPassword("");
-                setName("");
-              }}
-              className="text-blue-600 hover:text-blue-800 underline text-sm"
-            >
-              {isLogin ? "Need an admin account? Signup" : "Already have an account? Login"}
-            </button>
-          </div>
-          <p className="mt-4 text-sm text-gray-600">
-            Admin access only
-          </p>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 } 
