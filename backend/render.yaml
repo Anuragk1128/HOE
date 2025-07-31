@@ -3,7 +3,7 @@ services:
     name: house-of-evolve-backend
     env: node
     plan: free
-    buildCommand: npm ci
+    buildCommand: npm ci --production=false
     startCommand: npm start
     rootDir: backend
     envVars:
