@@ -1,31 +1,107 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Upload, X } from "lucide-react";
+import { ArrowLeft, Upload, X, Info, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 interface ImageType {
   value: string;
   label: string;
+  description: string;
+  requirements: string[];
+  usage: string[];
+  recommendedCount: number;
 }
 
 const imageTypes: ImageType[] = [
-  { value: 'hero', label: 'Hero Section' },
-  { value: 'category', label: 'Category Section' },
-  { value: 'logo', label: 'Logo' },
-  { value: 'banner', label: 'Banner' },
-  { value: 'team', label: 'Team' },
-  { value: 'about', label: 'About' },
-  { value: 'sustainability', label: 'Sustainability' },
-  { value: 'careers', label: 'Careers' },
-  { value: 'contact', label: 'Contact' },
-  { value: 'shipping', label: 'Shipping' },
-  { value: 'payment', label: 'Payment' }
-];
-
-const categories = [
-  "jewellery",
-  "sportswear"
+  { 
+    value: 'hero', 
+    label: 'Hero Section', 
+    description: 'Main banner images for homepage and landing pages',
+    requirements: ['High resolution (1920x1080 minimum)', 'Landscape orientation', 'Compressed for web'],
+    usage: ['Homepage hero banner', 'Landing page headers'],
+    recommendedCount: 1
+  },
+  { 
+    value: 'category', 
+    label: 'Category Section', 
+    description: 'Images for product category displays',
+    requirements: ['Square or 16:9 aspect ratio', 'Product-focused composition', 'Clear category representation'],
+    usage: ['Category page headers', 'Shop page category cards'],
+    recommendedCount: 2
+  },
+  { 
+    value: 'logo', 
+    label: 'Logo', 
+    description: 'Company logo and branding elements',
+    requirements: ['Transparent background (PNG)', 'High resolution', 'Simple and recognizable'],
+    usage: ['Website header', 'Footer', 'Email signatures'],
+    recommendedCount: 1
+  },
+  { 
+    value: 'banner', 
+    label: 'Banner', 
+    description: 'Promotional and marketing banners',
+    requirements: ['Wide aspect ratio (3:1 or 4:1)', 'Text overlay space', 'High contrast'],
+    usage: ['Promotional campaigns', 'Special offers', 'Newsletter headers'],
+    recommendedCount: 3
+  },
+  { 
+    value: 'team', 
+    label: 'Team', 
+    description: 'Employee and team member photos',
+    requirements: ['Square aspect ratio (1:1)', 'Professional headshots', 'Consistent style'],
+    usage: ['About page team section', 'Leadership profiles'],
+    recommendedCount: 5
+  },
+  { 
+    value: 'about', 
+    label: 'About', 
+    description: 'Images for about page content',
+    requirements: ['Storytelling composition', 'Company culture representation', 'High quality'],
+    usage: ['About page story section', 'Company values section'],
+    recommendedCount: 2
+  },
+  { 
+    value: 'sustainability', 
+    label: 'Sustainability', 
+    description: 'Images related to environmental initiatives',
+    requirements: ['Nature/environmental focus', 'Green/sustainable theme', 'Authentic representation'],
+    usage: ['Sustainability page', 'Environmental initiatives'],
+    recommendedCount: 4
+  },
+  { 
+    value: 'careers', 
+    label: 'Careers', 
+    description: 'Workplace and career-related images',
+    requirements: ['Professional workplace scenes', 'Diverse team representation', 'Positive work environment'],
+    usage: ['Careers page', 'Job listings'],
+    recommendedCount: 3
+  },
+  { 
+    value: 'contact', 
+    label: 'Contact', 
+    description: 'Contact page and customer service images',
+    requirements: ['Friendly and approachable', 'Customer service focus', 'Professional yet warm'],
+    usage: ['Contact page', 'Customer service section'],
+    recommendedCount: 1
+  },
+  { 
+    value: 'shipping', 
+    label: 'Shipping', 
+    description: 'Logistics and delivery-related images',
+    requirements: ['Shipping/delivery theme', 'Professional logistics', 'Clear and informative'],
+    usage: ['Shipping policy page', 'Delivery information'],
+    recommendedCount: 2
+  },
+  { 
+    value: 'payment', 
+    label: 'Payment', 
+    description: 'Payment and security-related images',
+    requirements: ['Security and trust focus', 'Payment method representation', 'Professional appearance'],
+    usage: ['Payment page', 'Security information'],
+    recommendedCount: 2
+  }
 ];
 
 export default function AddImagePage() {
@@ -33,7 +109,6 @@ export default function AddImagePage() {
   const [formData, setFormData] = useState({
     name: "",
     type: "",
-    category: "",
     altText: "",
     description: "",
     isActive: true,
@@ -44,6 +119,8 @@ export default function AddImagePage() {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const selectedImageType = imageTypes.find(type => type.value === formData.type);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -112,10 +189,6 @@ export default function AddImagePage() {
       formDataToSend.append("isActive", formData.isActive.toString());
       formDataToSend.append("isFeatured", formData.isFeatured.toString());
       formDataToSend.append("order", formData.order.toString());
-      
-      if (formData.category) {
-        formDataToSend.append("category", formData.category);
-      }
       
       formDataToSend.append("image", selectedFile);
 
@@ -206,25 +279,6 @@ export default function AddImagePage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category (Optional)
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select category</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Alt Text <span className="text-red-500">*</span>
               </label>
               <input
@@ -235,20 +289,6 @@ export default function AddImagePage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter alt text for accessibility"
                 required
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description (Optional)
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter image description"
               />
             </div>
 
@@ -264,6 +304,20 @@ export default function AddImagePage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0"
                 min="0"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description (Optional)
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter image description"
               />
             </div>
 
@@ -292,6 +346,59 @@ export default function AddImagePage() {
             </div>
           </div>
         </div>
+
+        {/* Image Type Guidance */}
+        {selectedImageType && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="flex items-start space-x-3">
+              <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  {selectedImageType.label} - Image Requirements
+                </h3>
+                <p className="text-blue-800 mb-4">{selectedImageType.description}</p>
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Requirements
+                    </h4>
+                    <ul className="space-y-1">
+                      {selectedImageType.requirements.map((req, index) => (
+                        <li key={index} className="text-sm text-blue-700 flex items-start">
+                          <span className="text-blue-500 mr-2">•</span>
+                          {req}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Where it will be used
+                    </h4>
+                    <ul className="space-y-1">
+                      {selectedImageType.usage.map((usage, index) => (
+                        <li key={index} className="text-sm text-blue-700 flex items-start">
+                          <span className="text-blue-500 mr-2">•</span>
+                          {usage}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-blue-100 rounded-md">
+                  <p className="text-sm text-blue-800">
+                    <strong>Recommended:</strong> {selectedImageType.recommendedCount} image{selectedImageType.recommendedCount !== 1 ? 's' : ''} for this type
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload Image</h2>

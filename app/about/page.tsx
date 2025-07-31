@@ -157,11 +157,11 @@ export default function AboutPage() {
                       <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
                         <img
                           src="/images/team/sarah-johnson.png"
-                          alt="Sarah Johnson"
+                          alt=""
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h4 className="font-semibold text-lg mb-1">Sarah Johnson</h4>
+                      <h4 className="font-semibold text-lg mb-1">Shubham </h4>
                       <p className="text-sm text-primary mb-2">Founder & CEO</p>
                       <p className="text-xs text-muted-foreground">
                         Passionate about sustainable fashion with 10+ years in the industry.
@@ -172,10 +172,10 @@ export default function AboutPage() {
                   <Card>
                     <CardContent className="p-6 text-center">
                       <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
-                        <img src="/images/team/mike-chen.png" alt="Mike Chen" className="w-full h-full object-cover" />
+                        <img src="/images/team/mike-chen.png" alt="" className="w-full h-full object-cover" />
                       </div>
-                      <h4 className="font-semibold text-lg mb-1">Mike Chen</h4>
-                      <p className="text-sm text-primary mb-2">Head of Design</p>
+                      <h4 className="font-semibold text-lg mb-1">Sakshi</h4>
+                      <p className="text-sm text-primary mb-2">Co-founder</p>
                       <p className="text-xs text-muted-foreground">
                         Award-winning designer focused on minimalist and sustainable aesthetics.
                       </p>
@@ -187,12 +187,12 @@ export default function AboutPage() {
                       <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
                         <img
                           src="/images/team/emma-rodriguez.png"
-                          alt="Emma Rodriguez"
+                          alt=""
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h4 className="font-semibold text-lg mb-1">Emma Rodriguez</h4>
-                      <p className="text-sm text-primary mb-2">Sustainability Director</p>
+                      <h4 className="font-semibold text-lg mb-1">Kshitij</h4>
+                      <p className="text-sm text-primary mb-2">Graphic Desinger</p>
                       <p className="text-xs text-muted-foreground">
                         Environmental scientist ensuring our practices meet the highest standards.
                       </p>
