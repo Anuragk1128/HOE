@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
+    "build": "echo 'Build completed'",
     "server": "nodemon server.js"
   },
   "author": "",
@@ -25,5 +26,9 @@
     "stripe": "^18.3.0",
     "swagger-ui-express": "^5.0.0",
     "validator": "^13.15.15"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
 }
