@@ -13,12 +13,12 @@ export interface WebsiteImage {
   updatedAt: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hoe.onrender.com/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hoe.onrender.com";
 
 // Fetch all active website images
 export const fetchWebsiteImages = async (): Promise<WebsiteImage[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/website-images`);
+    const response = await fetch(`${API_BASE_URL}/api/website-images`);
     if (response.ok) {
       const data = await response.json();
       return data.images || [];
@@ -33,7 +33,7 @@ export const fetchWebsiteImages = async (): Promise<WebsiteImage[]> => {
 // Fetch website images by type
 export const fetchWebsiteImagesByType = async (type: string): Promise<WebsiteImage[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/website-images/by-type/${type}`);
+    const response = await fetch(`${API_BASE_URL}/api/website-images/by-type/${type}`);
     if (response.ok) {
       const data = await response.json();
       return data.images || [];
@@ -48,7 +48,7 @@ export const fetchWebsiteImagesByType = async (type: string): Promise<WebsiteIma
 // Fetch a single website image by ID
 export const fetchWebsiteImageById = async (id: string): Promise<WebsiteImage | null> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/website-images/${id}`);
+    const response = await fetch(`${API_BASE_URL}/api/website-images/${id}`);
     if (response.ok) {
       const data = await response.json();
       return data.image || null;
@@ -101,7 +101,7 @@ export const getCategoryImage = async (category: string): Promise<WebsiteImage |
 // Get all images by type (for admin use)
 export const getImagesByType = async (type: string): Promise<WebsiteImage[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/website-images/by-type/${type}`, {
+    const response = await fetch(`${API_BASE_URL}/api/admin/website-images/by-type/${type}`, {
       headers: {
         "Authorization": `Bearer ${localStorage.getItem("adminToken")}`,
         "Content-Type": "application/json",

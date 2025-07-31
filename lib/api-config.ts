@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hoe.onrender.com/api"
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hoe.onrender.com"
 
 // Helper function to get full API URL
 export const getApiUrl = (endpoint: string): string => {

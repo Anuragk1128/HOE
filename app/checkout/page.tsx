@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/cart-context";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
+import { getApiUrl, getAuthHeaders } from "@/lib/api-config"
 
 const countries = ["India", "United States", "Belgium", "Germany", "France"];
 
@@ -33,7 +34,8 @@ export default function CheckoutPage() {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
+    const checked = e.target instanceof HTMLInputElement ? e.target.checked : false;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   };
 
@@ -52,7 +54,7 @@ export default function CheckoutPage() {
       
       try {
         const token = localStorage.getItem("token");
-        const order = {
+        const orderData = {
           items: state.items,
           total: totalPrice,
           date: new Date().toISOString(),
@@ -71,14 +73,11 @@ export default function CheckoutPage() {
         };
         
         // Save order to backend only after successful payment
-        const response = await fetch('http://localhost:5000/api/user/orders', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(order)
-        });
+        const response = await fetch(getApiUrl("/user/orders"), {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(orderData),
+        })
         
         if (response.ok) {
           setPaymentStatus("Order placed successfully!");
