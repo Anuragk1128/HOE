@@ -21,7 +21,7 @@ interface BackendProduct {
 // Convert backend product to frontend product format
 const convertBackendProduct = (backendProduct: BackendProduct): Product => {
   return {
-    id: parseInt(backendProduct._id) || 0, // Convert string ID to number
+    id: backendProduct._id, // Use the MongoDB ObjectId string as ID
     name: backendProduct.name,
     price: backendProduct.price,
     image: backendProduct.image[0] || "/placeholder.svg", // Use first image as main image
