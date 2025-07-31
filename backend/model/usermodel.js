@@ -13,7 +13,10 @@ const userSchema = new mongoose.Schema({
         items: [Object],
         total: Number,
         date: String,
-        orderId: String
+        orderId: String,
+        status: { type: String, default: 'pending' },
+        shippingAddress: { type: Object, default: {} },
+        paymentMode: { type: String, default: 'cod' }
     }]
 }, { minimize: false });
 

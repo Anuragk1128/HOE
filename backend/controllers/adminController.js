@@ -362,4 +362,163 @@ export const logout = async (req, res) => {
         console.log(error);
         res.status(500).json({ message: "Internal server error" });
     }
+};
+
+/**
+ * @swagger
+ * /api/admin/orders:
+ *   get:
+ *     summary: Get all orders (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 orders:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       userId:
+ *                         type: string
+ *                       userName:
+ *                         type: string
+ *                       items:
+ *                         type: array
+ *                       total:
+ *                         type: number
+ *                       date:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       orderId:
+ *                         type: string
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+export const getAllOrders = async (req, res) => {
+    try {
+        const users = await userModel.find({});
+        const allOrders = [];
+        
+        users.forEach(user => {
+            if (user.orderHistory && user.orderHistory.length > 0) {
+                user.orderHistory.forEach(order => {
+                    allOrders.push({
+                        _id: order._id,
+                        userId: user._id,
+                        userName: user.name,
+                        userEmail: user.email,
+                        userPhone: user.phone,
+                        items: order.items,
+                        total: order.total,
+                        date: order.date,
+                        status: order.status || 'pending',
+                        orderId: order.orderId,
+                        shippingAddress: order.shippingAddress || {},
+                        paymentMode: order.paymentMode || 'cod'
+                    });
+                });
+            }
+        });
+
+        // Sort orders by date (newest first)
+        allOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        res.status(200).json({
+            message: "Orders fetched successfully",
+            orders: allOrders
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+/**
+ * @swagger
+ * /api/admin/orders/{orderId}/status:
+ *   put:
+ *     summary: Update order status (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, processing, shipped, delivered, cancelled]
+ *     responses:
+ *       200:
+ *         description: Order status updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Order not found
+ *       500:
+ *         description: Internal server error
+ */
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+
+        if (!status) {
+            return res.status(400).json({ message: "Status is required" });
+        }
+
+        const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ message: "Invalid status" });
+        }
+
+        // Find the user who has this order
+        const user = await userModel.findOne({
+            'orderHistory._id': orderId
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Update the order status
+        const result = await userModel.updateOne(
+            { 'orderHistory._id': orderId },
+            { $set: { 'orderHistory.$.status': status } }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        res.status(200).json({
+            message: "Order status updated successfully"
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 }; 
