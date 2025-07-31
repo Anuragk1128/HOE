@@ -10,16 +10,19 @@ import { Separator } from "@/components/ui/separator"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { getApiUrl, getAuthHeaders } from "@/lib/api-config"
+import { useToast } from "@/hooks/use-toast"
 
 interface Order {
   _id: string
   orderNumber: string
   items: Array<{
-    product: {
+    product?: {
       name: string
       price: number
-      image: string
+      image?: string
     }
+    name?: string
+    price?: number
     quantity: number
   }>
   totalAmount: number
@@ -32,32 +35,26 @@ interface UserProfile {
   name: string
   email: string
   phone?: string
-  address?: {
-    street: string
-    city: string
-    state: string
-    zipCode: string
-    country: string
-  }
+  address?: string
+  city?: string
+  country?: string
 }
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
+  const { toast } = useToast()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    address: {
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      country: "",
-    },
+    address: "",
+    city: "",
+    country: "",
   })
 
   useEffect(() => {
@@ -69,7 +66,8 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch(getApiUrl("/user/profile"), {
+      setLoading(true)
+      const response = await fetch(getApiUrl("/api/user/profile"), {
         headers: getAuthHeaders(),
       })
 
@@ -80,17 +78,24 @@ export default function ProfilePage() {
           name: data.user.name || "",
           email: data.user.email || "",
           phone: data.user.phone || "",
-          address: {
-            street: data.user.address?.street || "",
-            city: data.user.address?.city || "",
-            state: data.user.address?.state || "",
-            zipCode: data.user.address?.zipCode || "",
-            country: data.user.address?.country || "",
-          },
+          address: data.user.address || "",
+          city: data.user.city || "",
+          country: data.user.country || "",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch profile data",
+          variant: "destructive",
         })
       }
     } catch (error) {
       console.error("Error fetching profile:", error)
+      toast({
+        title: "Error",
+        description: "Failed to fetch profile data",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -98,7 +103,7 @@ export default function ProfilePage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch(getApiUrl("/user/orders"), {
+      const response = await fetch(getApiUrl("/api/user/orders"), {
         headers: getAuthHeaders(),
       })
 
@@ -113,29 +118,23 @@ export default function ProfilePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    if (name.startsWith("address.")) {
-      const field = name.split(".")[1]
-      setFormData(prev => ({
-        ...prev,
-        address: {
-          ...prev.address,
-          [field]: value,
-        },
-      }))
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }))
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSaving(true)
+    
     try {
-      const response = await fetch(getApiUrl("/user/profile"), {
+      const response = await fetch(getApiUrl("/api/user/profile"), {
         method: "PUT",
-        headers: getAuthHeaders(),
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       })
 
@@ -143,10 +142,43 @@ export default function ProfilePage() {
         const data = await response.json()
         setProfile(data.user)
         setEditing(false)
+        toast({
+          title: "Success",
+          description: "Profile updated successfully",
+        })
+      } else {
+        const errorData = await response.json()
+        toast({
+          title: "Error",
+          description: errorData.message || "Failed to update profile",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Error updating profile:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
     }
+  }
+
+  const handleCancel = () => {
+    // Reset form data to current profile data
+    if (profile) {
+      setFormData({
+        name: profile.name || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        address: profile.address || "",
+        city: profile.city || "",
+        country: profile.country || "",
+      })
+    }
+    setEditing(false)
   }
 
   const formatDate = (dateString: string) => {
@@ -195,12 +227,22 @@ export default function ProfilePage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Profile Information</CardTitle>
-                    <Button
-                      variant="outline"
-                      onClick={() => setEditing(!editing)}
-                    >
-                      {editing ? "Cancel" : "Edit"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setEditing(!editing)}
+                        disabled={saving}
+                      >
+                        {editing ? "Cancel" : "Edit"}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={logout}
+                        disabled={saving}
+                      >
+                        Logout
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -213,6 +255,7 @@ export default function ProfilePage() {
                           value={formData.name}
                           onChange={handleInputChange}
                           className="mt-1"
+                          required
                         />
                       </div>
                       <div>
@@ -223,6 +266,7 @@ export default function ProfilePage() {
                           value={formData.email}
                           onChange={handleInputChange}
                           className="mt-1"
+                          required
                         />
                       </div>
                       <div>
@@ -236,62 +280,63 @@ export default function ProfilePage() {
                       </div>
                       <Separator />
                       <h3 className="font-medium">Address</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-4">
                         <div>
-                          <label className="text-sm font-medium">Street</label>
+                          <label className="text-sm font-medium">Street Address</label>
                           <Input
-                            name="address.street"
-                            value={formData.address.street}
+                            name="address"
+                            value={formData.address}
                             onChange={handleInputChange}
                             className="mt-1"
+                            placeholder="Enter your street address"
                           />
                         </div>
-                        <div>
-                          <label className="text-sm font-medium">City</label>
-                          <Input
-                            name="address.city"
-                            value={formData.address.city}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">State</label>
-                          <Input
-                            name="address.state"
-                            value={formData.address.state}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">ZIP Code</label>
-                          <Input
-                            name="address.zipCode"
-                            value={formData.address.zipCode}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-sm font-medium">Country</label>
-                          <Input
-                            name="address.country"
-                            value={formData.address.country}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">City</label>
+                            <Input
+                              name="city"
+                              value={formData.city}
+                              onChange={handleInputChange}
+                              className="mt-1"
+                              placeholder="Enter your city"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Country</label>
+                            <Input
+                              name="country"
+                              value={formData.country}
+                              onChange={handleInputChange}
+                              className="mt-1"
+                              placeholder="Enter your country"
+                            />
+                          </div>
                         </div>
                       </div>
-                      <Button type="submit" className="w-full">
-                        Save Changes
-                      </Button>
+                      <div className="flex gap-2 pt-4">
+                        <Button 
+                          type="submit" 
+                          className="flex-1"
+                          disabled={saving}
+                        >
+                          {saving ? "Saving..." : "Save Changes"}
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={handleCancel}
+                          disabled={saving}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </form>
                   ) : (
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Name</label>
-                        <p className="text-lg">{profile?.name}</p>
+                        <p className="text-lg">{profile?.name || "Not provided"}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Email</label>
@@ -303,11 +348,13 @@ export default function ProfilePage() {
                           <p className="text-lg">{profile.phone}</p>
                         </div>
                       )}
-                      {profile?.address && (
+                      {(profile?.address || profile?.city || profile?.country) && (
                         <div>
                           <label className="text-sm font-medium text-muted-foreground">Address</label>
                           <p className="text-lg">
-                            {profile.address.street}, {profile.address.city}, {profile.address.state} {profile.address.zipCode}, {profile.address.country}
+                            {[profile?.address, profile?.city, profile?.country]
+                              .filter(Boolean)
+                              .join(", ") || "Not provided"}
                           </p>
                         </div>
                       )}
@@ -327,24 +374,28 @@ export default function ProfilePage() {
                       {orders.map((order) => (
                         <div key={order._id} className="border rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium">Order #{order.orderNumber}</span>
-                            <Badge variant="secondary">{order.status}</Badge>
+                            <span className="font-medium">Order #{order.orderNumber || order._id}</span>
+                            <Badge variant="secondary">{order.status || "Pending"}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mb-2">
-                            {formatDate(order.createdAt)}
+                            {order.createdAt ? formatDate(order.createdAt) : "Date not available"}
                           </p>
                           <div className="space-y-2">
                             {order.items.map((item, index) => (
                               <div key={index} className="flex items-center justify-between">
-                                <span>{item.product.name} x {item.quantity}</span>
-                                <span>{formatPrice(item.product.price * item.quantity)}</span>
+                                <span>
+                                  {item.product?.name || item.name || "Unknown Product"} x {item.quantity || 1}
+                                </span>
+                                <span>
+                                  {formatPrice((item.product?.price || item.price || 0) * (item.quantity || 1))}
+                                </span>
                               </div>
                             ))}
                           </div>
                           <Separator className="my-2" />
                           <div className="flex items-center justify-between font-medium">
                             <span>Total</span>
-                            <span>{formatPrice(order.totalAmount)}</span>
+                            <span>{formatPrice(order.totalAmount || 0)}</span>
                           </div>
                         </div>
                       ))}
