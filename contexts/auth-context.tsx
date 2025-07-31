@@ -1,97 +1,118 @@
-"use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
+"use client"
 
-interface AuthContextType {
-  user: string | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  register: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  logout: () => void;
-  loading: boolean;
+import { createContext, useContext, useState, useEffect, ReactNode } from "react"
+
+interface User {
+  _id: string
+  name: string
+  email: string
+  role: string
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType {
+  user: User | null
+  login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string) => Promise<boolean>
+  logout: () => void
+  loading: boolean
+}
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://hoe.onrender.com/api"
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(storedUser);
-  }, []);
+    // Check if user is logged in on mount
+    const token = localStorage.getItem("token")
+    if (token) {
+      // You could verify the token here if needed
+      const userData = localStorage.getItem("user")
+      if (userData) {
+        try {
+          // Try to parse as JSON first
+          const parsedUser = JSON.parse(userData)
+          setUser(parsedUser)
+        } catch (error) {
+          // If parsing fails, it might be legacy data (just email string)
+          // Clear the invalid data and let user login again
+          console.warn("Invalid user data in localStorage, clearing...")
+          localStorage.removeItem("user")
+          localStorage.removeItem("token")
+        }
+      }
+    }
+    setLoading(false)
+  }, [])
 
-  const login = async (email: string, password: string) => {
-    setLoading(true);
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:5000/api/user/login', {
-        method: 'POST',
+      const response = await fetch(`${API_BASE_URL}/user/login`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
+      })
 
       if (response.ok) {
-        setUser(email);
-        localStorage.setItem("user", email);
-        localStorage.setItem("token", data.token);
-        return { success: true, message: data.message };
-      } else {
-        return { success: false, message: data.message };
+        const data = await response.json()
+        localStorage.setItem("token", data.token)
+        localStorage.setItem("user", JSON.stringify(data.user))
+        setUser(data.user)
+        return true
       }
+      return false
     } catch (error) {
-      return { success: false, message: "Network error. Please try again." };
-    } finally {
-      setLoading(false);
+      console.error("Login error:", error)
+      return false
     }
-  };
+  }
 
-  const register = async (name: string, email: string, password: string) => {
-    setLoading(true);
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:5000/api/user/register', {
-        method: 'POST',
+      const response = await fetch(`${API_BASE_URL}/user/register`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await response.json();
+      })
 
       if (response.ok) {
-        setUser(email);
-        localStorage.setItem("user", email);
-        localStorage.setItem("token", data.token);
-        return { success: true, message: data.message };
-      } else {
-        return { success: false, message: data.message };
+        const data = await response.json()
+        localStorage.setItem("token", data.token)
+        localStorage.setItem("user", JSON.stringify(data.user))
+        setUser(data.user)
+        return true
       }
+      return false
     } catch (error) {
-      return { success: false, message: "Network error. Please try again." };
-    } finally {
-      setLoading(false);
+      console.error("Register error:", error)
+      return false
     }
-  };
+  }
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    // No redirect - users can browse without login
-  };
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    setUser(null)
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
-  return context;
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider")
+  }
+  return context
 } 

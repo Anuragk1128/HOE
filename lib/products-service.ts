@@ -31,10 +31,13 @@ const convertBackendProduct = (backendProduct: BackendProduct): Product => {
   };
 };
 
+// Base URL for API calls
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hoe.onrender.com';
+
 // Fetch all products from backend
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await fetch("http://localhost:5000/api/products", {
+    const response = await fetch(`${API_BASE_URL}/api/products`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +59,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
 // Fetch products by category
 export const fetchProductsByCategory = async (category: string): Promise<Product[]> => {
   try {
-    const response = await fetch(`http://localhost:5000/api/products?category=${category}`, {
+    const response = await fetch(`${API_BASE_URL}/api/products?category=${category}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -78,7 +81,7 @@ export const fetchProductsByCategory = async (category: string): Promise<Product
 // Search products
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
-    const response = await fetch(`http://localhost:5000/api/products?search=${encodeURIComponent(query)}`, {
+    const response = await fetch(`${API_BASE_URL}/api/products?search=${encodeURIComponent(query)}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -100,7 +103,7 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
 // Get product by ID
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
-    const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -140,7 +143,7 @@ export const getProductsWithFilters = async (params: {
       searchParams.append('sort', params.sort);
     }
 
-    const response = await fetch(`http://localhost:5000/api/products?${searchParams.toString()}`, {
+    const response = await fetch(`${API_BASE_URL}/api/products?${searchParams.toString()}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

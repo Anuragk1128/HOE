@@ -55,10 +55,23 @@ const createToken = (id) => {
 export const userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
+        
+        // Validate input
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
+
+        // Check if JWT_SECRET is configured
+        if (!process.env.JWT_SECRET) {
+            console.error("JWT_SECRET environment variable is not set");
+            return res.status(500).json({ message: "Server configuration error" });
+        }
+
         const user = await userModel.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: "User not found" });
         }
+        
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
             const token = createToken(user._id);
@@ -67,8 +80,8 @@ export const userLogin = async (req, res) => {
             return res.status(400).json({ message: "Invalid password" });
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal server error" });
+        console.error("Login error:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
@@ -122,6 +135,18 @@ export const userLogin = async (req, res) => {
 export const userRegister = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        
+        // Validate input
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "Name, email, and password are required" });
+        }
+
+        // Check if JWT_SECRET is configured
+        if (!process.env.JWT_SECRET) {
+            console.error("JWT_SECRET environment variable is not set");
+            return res.status(500).json({ message: "Server configuration error" });
+        }
+
         const exists = await userModel.findOne({ email });
         if (exists) {
             return res.status(400).json({ message: "User already exists" });
@@ -137,14 +162,14 @@ export const userRegister = async (req, res) => {
         const newUser = new userModel({
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
         });
-        const user = await newUser.save();
-        const token = createToken(user._id);
-        res.status(201).json({ message: "User registered successfully", user, token });
+        const savedUser = await newUser.save();
+        const token = createToken(savedUser._id);
+        res.status(201).json({ message: "User registered successfully", user: savedUser, token });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal server error" });
+        console.error("Register error:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 

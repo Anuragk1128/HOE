@@ -13,7 +13,9 @@ import specs from "./swagger.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-connectDB();
+
+// Connect to MongoDB
+connectDB().catch(console.error);
 
 app.use(cors());
 app.use(express.json());
@@ -25,6 +27,18 @@ app.get("/health", (req, res) => {
         message: "Server is running",
         timestamp: new Date().toISOString()
     });
+});
+
+// Test endpoint to check environment variables
+app.get("/test-config", (req, res) => {
+    const config = {
+        mongodb_uri: process.env.MONGODB_URI ? "Set" : "Not Set",
+        jwt_secret: process.env.JWT_SECRET ? "Set" : "Not Set",
+        cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? "Set" : "Not Set",
+        node_env: process.env.NODE_ENV || "Not Set",
+        port: process.env.PORT || "Not Set"
+    };
+    res.json(config);
 });
 
 // Swagger UI setup
