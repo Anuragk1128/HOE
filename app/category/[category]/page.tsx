@@ -1,6 +1,3 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import { notFound } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -11,9 +8,9 @@ import { getCategoryImage } from "@/lib/website-images-service"
 import type { Product } from "@/contexts/cart-context"
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     category: string
-  }
+  }>
 }
 
 const categoryInfo = {
@@ -30,12 +27,8 @@ const categoryInfo = {
   },
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-  const { category } = params
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const [categoryImage, setCategoryImage] = useState("")
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const { category } = await params
 
   if (!categoryInfo[category as keyof typeof categoryInfo]) {
     notFound()
@@ -44,34 +37,22 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const info = categoryInfo[category as keyof typeof categoryInfo]
 
   // Fetch products and image for this category
-  useEffect(() => {
-    const loadCategoryData = async () => {
-      try {
-        setLoading(true)
-        setError("")
-        
-        // Fetch products
-        const categoryProducts = await fetchProductsByCategory(category)
-        setProducts(categoryProducts)
-        
-        // Fetch category image
-        const image = await getCategoryImage(category)
-        if (image) {
-          setCategoryImage(image.imageUrl)
-        } else {
-          // Fallback to hardcoded image
-          setCategoryImage(categoryInfo[category as keyof typeof categoryInfo]?.image || "/placeholder.svg")
-        }
-      } catch (error) {
-        console.error("Error loading category data:", error)
-        setError("Failed to load products for this category")
-      } finally {
-        setLoading(false)
-      }
-    }
+  let products: Product[] = []
+  let categoryImage = info.image
 
-    loadCategoryData()
-  }, [category])
+  try {
+    // Fetch products
+    products = await fetchProductsByCategory(category)
+    
+    // Fetch category image
+    const image = await getCategoryImage(category)
+    if (image) {
+      categoryImage = image.imageUrl
+    }
+  } catch (error) {
+    console.error("Error loading category data:", error)
+    // Continue with empty products array
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -81,7 +62,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         {/* Category Hero */}
         <section className="relative h-[40vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0">
-            <img src={categoryImage || info.image || "/placeholder.svg"} alt={info.title} className="h-full w-full object-cover" />
+            <img src={categoryImage || "/placeholder.svg"} alt={info.title} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-black/50" />
           </div>
           <div className="relative z-10 text-center text-white px-4">
@@ -104,17 +85,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               </div>
             </div>
 
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span className="ml-2">Loading products...</span>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-lg font-medium mb-2 text-red-600">Error loading products</p>
-                <p className="text-muted-foreground">{error}</p>
-              </div>
-            ) : products.length > 0 ? (
+            {products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {products.map((product: Product) => (
                   <ProductCard key={product.id} product={product} />
