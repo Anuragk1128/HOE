@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { getApiUrl, getAdminHeaders } from "@/lib/api-config";
 
@@ -18,8 +18,15 @@ export default function AdminLayout({
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Skip authentication check for login page
+    if (pathname === "/admin/login") {
+      setLoading(false);
+      return;
+    }
+
     const verifyAdmin = async () => {
       const token = localStorage.getItem("adminToken");
       if (!token) {
@@ -51,7 +58,7 @@ export default function AdminLayout({
     };
 
     verifyAdmin();
-  }, [router]);
+  }, [router, pathname]);
 
   const handleLogout = async () => {
     try {
@@ -74,6 +81,11 @@ export default function AdminLayout({
         <div className="text-lg">Loading...</div>
       </div>
     );
+  }
+
+  // For login page, just render children without admin layout
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
   }
 
   if (!adminUser) {

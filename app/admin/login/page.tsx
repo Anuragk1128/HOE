@@ -47,34 +47,7 @@ export default function AdminLoginPage() {
     }
   }
 
-  const handleRegister = async () => {
-    setLoading(true)
-    setError("")
 
-    try {
-      const response = await fetch(getApiUrl("/admin/register"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem("adminToken", data.token)
-        localStorage.setItem("adminUser", JSON.stringify(data.admin))
-        router.push("/admin/dashboard")
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Registration failed")
-      }
-    } catch (error) {
-      setError("Network error. Please try again.")
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -114,23 +87,13 @@ export default function AdminLoginPage() {
             {error && (
               <div className="text-red-500 text-sm text-center">{error}</div>
             )}
-            <div className="flex gap-2">
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={loading}
-              >
-                {loading ? "Logging in..." : "Login"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleRegister}
-                disabled={loading}
-              >
-                {loading ? "Registering..." : "Register"}
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </Button>
           </form>
         </CardContent>
       </Card>
