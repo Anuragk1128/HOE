@@ -1,8 +1,53 @@
+"use client";
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
+import { fetchWebsiteImagesByType } from "@/lib/website-images-service"
+
+interface WebsiteImage {
+  _id: string;
+  name: string;
+  type: string;
+  category?: string;
+  imageUrl: string;
+  altText: string;
+  description?: string;
+  isActive: boolean;
+  isFeatured: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function AboutPage() {
+  const [aboutImages, setAboutImages] = useState<WebsiteImage[]>([]);
+  const [teamImages, setTeamImages] = useState<WebsiteImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const [aboutData, teamData] = await Promise.all([
+          fetchWebsiteImagesByType("about"),
+          fetchWebsiteImagesByType("team")
+        ]);
+        
+        setAboutImages(aboutData.filter(img => img.isActive));
+        setTeamImages(teamData.filter(img => img.isActive));
+      } catch (error) {
+        console.error("Error fetching images:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchImages();
+  }, []);
+
+  // Get the first about image for the story section
+  const storyImage = aboutImages.find(img => img.category === "story" || img.name.toLowerCase().includes("story")) || aboutImages[0];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -26,16 +71,22 @@ export default function AboutPage() {
               <div>
                 <h2 className="font-playfair text-3xl font-bold mb-6 text-center">Our Story</h2>
                 <div className="mb-8">
-                  <img
-                    src="/images/about/company-story.png"
-                    alt="House of Evolve Design Studio"
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
+                  {storyImage ? (
+                    <img
+                      src={storyImage.imageUrl}
+                      alt={storyImage.altText}
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
+                      <p className="text-muted-foreground">No story image available</p>
+                    </div>
+                  )}
                 </div>
                 <div className="prose prose-lg mx-auto text-muted-foreground">
                   <p className="text-center mb-8">
                     House of Evolve was born from a simple belief: fashion should be beautiful, ethical, and
-                    sustainable. Founded in 2020, we started as a small team of designers and sustainability advocates
+                    sustainable. Founded in 2025, we started as a small team of designers and sustainability advocates
                     who wanted to create a brand that reflects our values and contributes positively to the world.
                   </p>
                 </div>
@@ -152,52 +203,74 @@ export default function AboutPage() {
               <div>
                 <h2 className="font-playfair text-3xl font-bold mb-8 text-center">Meet Our Team</h2>
                 <div className="grid md:grid-cols-3 gap-8">
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
-                        <img
-                          src="/images/team/sarah-johnson.png"
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <h4 className="font-semibold text-lg mb-1">Shubham </h4>
-                      <p className="text-sm text-primary mb-2">Founder & CEO</p>
-                      <p className="text-xs text-muted-foreground">
-                        Passionate about sustainable fashion with 10+ years in the industry.
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {teamImages.length > 0 ? (
+                    teamImages.slice(0, 3).map((member, index) => (
+                      <Card key={member._id}>
+                        <CardContent className="p-6 text-center">
+                          <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
+                            <img
+                              src={member.imageUrl}
+                              alt={member.altText}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <h4 className="font-semibold text-lg mb-1">{member.name}</h4>
+                          <p className="text-sm text-primary mb-2">{member.description || "Team Member"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {member.category || "Passionate about sustainable fashion and conscious living."}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    // Fallback team members if no images are available
+                    <>
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <span className="text-2xl">👤</span>
+                            </div>
+                          </div>
+                          <h4 className="font-semibold text-lg mb-1">Shubham</h4>
+                          <p className="text-sm text-primary mb-2">Founder & CEO</p>
+                          <p className="text-xs text-muted-foreground">
+                            Passionate about sustainable fashion with 10+ years in the industry.
+                          </p>
+                        </CardContent>
+                      </Card>
 
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
-                        <img src="/images/team/mike-chen.png" alt="" className="w-full h-full object-cover" />
-                      </div>
-                      <h4 className="font-semibold text-lg mb-1">Sakshi</h4>
-                      <p className="text-sm text-primary mb-2">Co-founder</p>
-                      <p className="text-xs text-muted-foreground">
-                        Award-winning designer focused on minimalist and sustainable aesthetics.
-                      </p>
-                    </CardContent>
-                  </Card>
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <span className="text-2xl">👤</span>
+                            </div>
+                          </div>
+                          <h4 className="font-semibold text-lg mb-1">Sakshi</h4>
+                          <p className="text-sm text-primary mb-2">Co-founder</p>
+                          <p className="text-xs text-muted-foreground">
+                            Focused on minimalist and sustainable aesthetics.
+                          </p>
+                        </CardContent>
+                      </Card>
 
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
-                        <img
-                          src="/images/team/emma-rodriguez.png"
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <h4 className="font-semibold text-lg mb-1">Kshitij</h4>
-                      <p className="text-sm text-primary mb-2">Graphic Desinger</p>
-                      <p className="text-xs text-muted-foreground">
-                        Environmental scientist ensuring our practices meet the highest standards.
-                      </p>
-                    </CardContent>
-                  </Card>
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <span className="text-2xl">👤</span>
+                            </div>
+                          </div>
+                          <h4 className="font-semibold text-lg mb-1">Kshitij</h4>
+                          <p className="text-sm text-primary mb-2">Graphic Designer</p>
+                          <p className="text-xs text-muted-foreground">
+                            Graphic Designer ensuring our practices meet the highest standards.
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
