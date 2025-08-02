@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
@@ -13,7 +14,8 @@ import { getProductsWithFilters } from "@/lib/products-service"
 import type { Product } from "@/contexts/cart-context"
 
 export default function Shop() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const searchParams = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState("name")
   const [products, setProducts] = useState<Product[]>([])
@@ -68,9 +70,14 @@ export default function Shop() {
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="font-playfair text-3xl font-bold mb-4">Shop All Products</h1>
+            <h1 className="font-playfair text-3xl font-bold mb-4">
+              {searchQuery ? `Search Results for "${searchQuery}"` : "Shop All Products"}
+            </h1>
             <p className="text-muted-foreground">
-              Discover our complete collection of sustainable and stylish products
+              {searchQuery 
+                ? `Found ${products.length} product${products.length !== 1 ? 's' : ''} matching your search`
+                : "Discover our complete collection of sustainable and stylish products"
+              }
             </p>
           </div>
 
