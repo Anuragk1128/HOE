@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { ShoppingBag, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -42,10 +43,14 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardContent className="p-0">
         <div className="relative aspect-square overflow-hidden">
           <Link href={`/product/${product.id}`}>
-            <img
+            {/* Product Image - Required: 600x600px (1:1 ratio) - Responsive */}
+            <Image
               src={product.image || "/placeholder.svg"}
               alt={product.name}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              quality={75}
             />
           </Link>
 

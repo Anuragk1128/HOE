@@ -18,7 +18,7 @@ const imageTypes: ImageType[] = [
     value: 'hero', 
     label: 'Hero Section', 
     description: 'Main banner images for homepage and landing pages',
-    requirements: ['High resolution (1920x1080 minimum)', 'Landscape orientation', 'Compressed for web'],
+    requirements: ['Exact dimensions: 1920x1080px (16:9 ratio)', 'High resolution', 'Compressed for web (< 500KB)'],
     usage: ['Homepage hero banner', 'Landing page headers'],
     recommendedCount: 1
   },
@@ -26,7 +26,7 @@ const imageTypes: ImageType[] = [
     value: 'category', 
     label: 'Category Section', 
     description: 'Images for product category displays',
-    requirements: ['Square or 16:9 aspect ratio', 'Product-focused composition', 'Clear category representation'],
+    requirements: ['Exact dimensions: 800x600px (4:3 ratio)', 'Product-focused composition', 'Clear category representation'],
     usage: ['Category page headers', 'Shop page category cards'],
     recommendedCount: 2
   },
@@ -34,7 +34,7 @@ const imageTypes: ImageType[] = [
     value: 'logo', 
     label: 'Logo', 
     description: 'Company logo and branding elements',
-    requirements: ['Transparent background (PNG)', 'High resolution', 'Simple and recognizable'],
+    requirements: ['Exact dimensions: 56x56px (1:1 ratio)', 'Transparent background (PNG)', 'Simple and recognizable'],
     usage: ['Website header', 'Footer', 'Email signatures'],
     recommendedCount: 1
   },
@@ -42,7 +42,7 @@ const imageTypes: ImageType[] = [
     value: 'banner', 
     label: 'Banner', 
     description: 'Promotional and marketing banners',
-    requirements: ['Wide aspect ratio (3:1 or 4:1)', 'Text overlay space', 'High contrast'],
+    requirements: ['Exact dimensions: 1200x600px (2:1 ratio)', 'Text overlay space', 'High contrast'],
     usage: ['Promotional campaigns', 'Special offers', 'Newsletter headers'],
     recommendedCount: 3
   },
@@ -50,7 +50,7 @@ const imageTypes: ImageType[] = [
     value: 'team', 
     label: 'Team', 
     description: 'Employee and team member photos',
-    requirements: ['Square aspect ratio (1:1)', 'Professional headshots', 'Consistent style'],
+    requirements: ['Exact dimensions: 200x200px (1:1 ratio)', 'Professional headshots', 'Consistent style'],
     usage: ['About page team section', 'Leadership profiles'],
     recommendedCount: 5
   },
@@ -58,7 +58,7 @@ const imageTypes: ImageType[] = [
     value: 'about', 
     label: 'About', 
     description: 'Images for about page content',
-    requirements: ['Storytelling composition', 'Company culture representation', 'High quality'],
+    requirements: ['Exact dimensions: 800x400px (2:1 ratio)', 'Storytelling composition', 'Company culture representation'],
     usage: ['About page story section', 'Company values section'],
     recommendedCount: 2
   },
@@ -66,7 +66,7 @@ const imageTypes: ImageType[] = [
     value: 'sustainability', 
     label: 'Sustainability', 
     description: 'Images related to environmental initiatives',
-    requirements: ['Nature/environmental focus', 'Green/sustainable theme', 'Authentic representation'],
+    requirements: ['Exact dimensions: 800x600px (4:3 ratio)', 'Nature/environmental focus', 'Green/sustainable theme'],
     usage: ['Sustainability page', 'Environmental initiatives'],
     recommendedCount: 4
   },
@@ -74,7 +74,7 @@ const imageTypes: ImageType[] = [
     value: 'careers', 
     label: 'Careers', 
     description: 'Workplace and career-related images',
-    requirements: ['Professional workplace scenes', 'Diverse team representation', 'Positive work environment'],
+    requirements: ['Exact dimensions: 800x600px (4:3 ratio)', 'Professional workplace scenes', 'Diverse team representation'],
     usage: ['Careers page', 'Job listings'],
     recommendedCount: 3
   },
@@ -82,7 +82,7 @@ const imageTypes: ImageType[] = [
     value: 'contact', 
     label: 'Contact', 
     description: 'Contact page and customer service images',
-    requirements: ['Friendly and approachable', 'Customer service focus', 'Professional yet warm'],
+    requirements: ['Exact dimensions: 800x600px (4:3 ratio)', 'Friendly and approachable', 'Customer service focus'],
     usage: ['Contact page', 'Customer service section'],
     recommendedCount: 1
   },
@@ -90,7 +90,7 @@ const imageTypes: ImageType[] = [
     value: 'shipping', 
     label: 'Shipping', 
     description: 'Logistics and delivery-related images',
-    requirements: ['Shipping/delivery theme', 'Professional logistics', 'Clear and informative'],
+    requirements: ['Exact dimensions: 800x600px (4:3 ratio)', 'Shipping/delivery theme', 'Professional logistics'],
     usage: ['Shipping policy page', 'Delivery information'],
     recommendedCount: 2
   },

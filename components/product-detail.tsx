@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Minus, Plus, Heart, Share2, Truck, Shield, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Minus, Plus, ShoppingBag } from "lucide-react"
 import type { Product } from "@/contexts/cart-context"
 import { useCart } from "@/contexts/cart-context"
+import Image from "next/image"
 
 interface ProductDetailProps {
   product: Product
@@ -31,8 +32,17 @@ export function ProductDetail({ product }: ProductDetailProps) {
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
         {/* Product Image */}
         <div className="space-y-4">
-          <div className="aspect-square overflow-hidden rounded-lg border bg-muted">
-            <img src={product.image || "/placeholder.svg"} alt={product.name} className="h-full w-full object-cover" />
+          <div className="aspect-square overflow-hidden rounded-lg border bg-muted relative">
+            {/* Product Detail Image - Required: 800x800px (1:1 ratio) - Responsive */}
+            <Image 
+              src={product.image || "/placeholder.svg"} 
+              alt={product.name} 
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover" 
+              priority
+              quality={85}
+            />
           </div>
         </div>
 
@@ -56,52 +66,32 @@ export function ProductDetail({ product }: ProductDetailProps) {
           {/* Quantity and Add to Cart */}
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
-              <span className="font-medium">Quantity:</span>
-              <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium">Quantity:</label>
+              <div className="flex items-center border rounded-md">
                 <Button
-                  variant="outline"
-                  size="icon"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
+                  className="h-8 w-8 p-0"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
-                <span className="w-12 text-center font-medium">{quantity}</span>
-                <Button variant="outline" size="icon" onClick={() => setQuantity(quantity + 1)}>
+                <span className="px-4 py-2 text-sm font-medium">{quantity}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="h-8 w-8 p-0"
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
-            <div className="flex space-x-4">
-              <Button onClick={handleAddToCart} className="flex-1" size="lg">
-                Add to Cart - {formatPrice(product.price * quantity)}
-              </Button>
-              <Button variant="outline" size="icon">
-                <Heart className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon">
-                <Share2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Features */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 text-sm">
-              <Truck className="h-5 w-5 text-primary" />
-              <span>Free shipping on orders over ₹500</span>
-            </div>
-            <div className="flex items-center space-x-3 text-sm">
-              <Shield className="h-5 w-5 text-primary" />
-              <span>1 year warranty included</span>
-            </div>
-            <div className="flex items-center space-x-3 text-sm">
-              <RotateCcw className="h-5 w-5 text-primary" />
-              <span>30-day return policy</span>
-            </div>
+            <Button onClick={handleAddToCart} className="w-full" size="lg">
+              <ShoppingBag className="mr-2 h-5 w-5" />
+              Add to Cart
+            </Button>
           </div>
         </div>
       </div>

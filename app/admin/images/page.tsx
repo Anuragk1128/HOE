@@ -18,17 +18,83 @@ interface WebsiteImage {
 }
 
 const imageTypes = [
-  { value: 'hero', label: 'Hero Section', color: 'bg-blue-100 text-blue-800' },
-  { value: 'category', label: 'Category Section', color: 'bg-green-100 text-green-800' },
-  { value: 'logo', label: 'Logo', color: 'bg-purple-100 text-purple-800' },
-  { value: 'banner', label: 'Banner', color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'team', label: 'Team', color: 'bg-pink-100 text-pink-800' },
-  { value: 'about', label: 'About', color: 'bg-indigo-100 text-indigo-800' },
-  { value: 'sustainability', label: 'Sustainability', color: 'bg-emerald-100 text-emerald-800' },
-  { value: 'careers', label: 'Careers', color: 'bg-orange-100 text-orange-800' },
-  { value: 'contact', label: 'Contact', color: 'bg-red-100 text-red-800' },
-  { value: 'shipping', label: 'Shipping', color: 'bg-cyan-100 text-cyan-800' },
-  { value: 'payment', label: 'Payment', color: 'bg-gray-100 text-gray-800' }
+  { 
+    value: 'hero', 
+    label: 'Hero Section', 
+    color: 'bg-blue-100 text-blue-800',
+    dimensions: '1920x1080px (16:9 ratio)',
+    description: 'Homepage hero banner image'
+  },
+  { 
+    value: 'category', 
+    label: 'Category Section', 
+    color: 'bg-green-100 text-green-800',
+    dimensions: '800x600px (4:3 ratio)',
+    description: 'Category cards on homepage'
+  },
+  { 
+    value: 'logo', 
+    label: 'Logo', 
+    color: 'bg-purple-100 text-purple-800',
+    dimensions: '56x56px (1:1 ratio)',
+    description: 'Website logo in navigation'
+  },
+  { 
+    value: 'banner', 
+    label: 'Banner', 
+    color: 'bg-yellow-100 text-yellow-800',
+    dimensions: '1200x600px (2:1 ratio)',
+    description: 'Category page hero banners'
+  },
+  { 
+    value: 'team', 
+    label: 'Team', 
+    color: 'bg-pink-100 text-pink-800',
+    dimensions: '200x200px (1:1 ratio)',
+    description: 'Team member profile images'
+  },
+  { 
+    value: 'about', 
+    label: 'About', 
+    color: 'bg-indigo-100 text-indigo-800',
+    dimensions: '800x400px (2:1 ratio)',
+    description: 'About page story images'
+  },
+  { 
+    value: 'sustainability', 
+    label: 'Sustainability', 
+    color: 'bg-emerald-100 text-emerald-800',
+    dimensions: '800x600px (4:3 ratio)',
+    description: 'Sustainability page images'
+  },
+  { 
+    value: 'careers', 
+    label: 'Careers', 
+    color: 'bg-orange-100 text-orange-800',
+    dimensions: '800x600px (4:3 ratio)',
+    description: 'Careers page images'
+  },
+  { 
+    value: 'contact', 
+    label: 'Contact', 
+    color: 'bg-red-100 text-red-800',
+    dimensions: '800x600px (4:3 ratio)',
+    description: 'Contact page images'
+  },
+  { 
+    value: 'shipping', 
+    label: 'Shipping', 
+    color: 'bg-cyan-100 text-cyan-800',
+    dimensions: '800x600px (4:3 ratio)',
+    description: 'Shipping page images'
+  },
+  { 
+    value: 'payment', 
+    label: 'Payment', 
+    color: 'bg-gray-100 text-gray-800',
+    dimensions: '800x600px (4:3 ratio)',
+    description: 'Payment page images'
+  }
 ];
 
 export default function AdminImagesPage() {
@@ -144,6 +210,11 @@ export default function AdminImagesPage() {
     return typeInfo?.label || type;
   };
 
+  const getTypeDimensions = (type: string) => {
+    const typeInfo = imageTypes.find(t => t.value === type);
+    return typeInfo?.dimensions || "N/A";
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
@@ -184,6 +255,39 @@ export default function AdminImagesPage() {
           <Plus className="h-4 w-4 mr-2" />
           Add Image
         </Link>
+      </div>
+
+      {/* Image Requirements Information */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+          <ImageIcon className="h-5 w-5 mr-2" />
+          Image Requirements Guide
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {imageTypes.map((type) => (
+            <div key={type.value} className="bg-white rounded-lg p-4 border border-blue-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${type.color}`}>
+                  {type.label}
+                </span>
+                <span className="text-xs text-gray-500 font-mono">{type.dimensions}</span>
+              </div>
+              <p className="text-sm text-gray-600">{type.description}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 p-3 bg-blue-100 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Note:</strong> Use the exact dimensions specified above to ensure images display correctly on the website. 
+            Recommended file formats: JPG, PNG, WebP. Keep file sizes under 500KB for optimal performance.
+          </p>
+          <div className="mt-3 p-3 bg-green-100 rounded-lg">
+            <p className="text-sm text-green-800">
+              <strong>Responsive Images:</strong> All images are automatically optimized for different screen sizes. 
+              The system serves appropriately sized images for mobile, tablet, and desktop devices.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -265,6 +369,9 @@ export default function AdminImagesPage() {
                     Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Required Dimensions
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Category
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -283,6 +390,7 @@ export default function AdminImagesPage() {
                   <tr key={image._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-16 w-16 flex-shrink-0">
+                        {/* Admin Image Preview - Required: 64x64px (1:1 ratio) */}
                         <img
                           className="h-16 w-16 rounded-lg object-cover"
                           src={image.imageUrl}
@@ -299,6 +407,11 @@ export default function AdminImagesPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(image.type)}`}>
                         {getTypeLabel(image.type)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-xs text-gray-500 font-mono">
+                        {getTypeDimensions(image.type)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

@@ -15,9 +15,9 @@ interface CategoryPageProps {
 
 const categoryInfo = {
   jewellery: {
-    title: "Jewelry Collection",
+    title: "Jewellery Collection",
     description:
-      "Discover our ethically crafted jewelry collection featuring sustainable materials and timeless designs.",
+      "Discover our ethically crafted jewellerry collection featuring sustainable materials and timeless designs.",
     image: "/images/jwl.jpeg",
   },
   sportswear: {
@@ -62,6 +62,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         {/* Category Hero */}
         <section className="relative h-[40vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0">
+            {/* Category Hero Image - Required: 1200x600px (2:1 ratio) */}
             <img src={categoryImage || "/placeholder.svg"} alt={info.title} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-black/50" />
           </div>
