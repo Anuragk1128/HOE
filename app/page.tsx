@@ -167,7 +167,7 @@ export default function Home() {
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                       <div className="text-center text-white">
-                        <h3 className="font-playfair text-xl sm:text-2xl font-bold mb-2">Jewellerry</h3>
+                        <h3 className="font-playfair text-xl sm:text-2xl font-bold mb-2">Jewellery</h3>
                         <p className="text-xs sm:text-sm opacity-90">Ethically crafted accessories</p>
                       </div>
                     </div>
