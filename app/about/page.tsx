@@ -72,11 +72,14 @@ export default function AboutPage() {
                 <h2 className="font-playfair text-3xl font-bold mb-6 text-center">Our Story</h2>
                 <div className="mb-8">
                   {storyImage ? (
-                    <img
-                      src={storyImage.imageUrl}
-                      alt={storyImage.altText}
-                      className="w-full h-64 object-cover rounded-lg"
-                    />
+                    <>
+                      {/* About Story Image - Required: 800x400px (2:1 ratio) */}
+                      <img
+                        src={storyImage.imageUrl}
+                        alt={storyImage.altText}
+                        className="w-full h-64 object-cover rounded-lg"
+                      />
+                    </>
                   ) : (
                     <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
                       <p className="text-muted-foreground">No story image available</p>
@@ -208,6 +211,7 @@ export default function AboutPage() {
                       <Card key={member._id}>
                         <CardContent className="p-6 text-center">
                           <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
+                            {/* Team Member Image - Required: 200x200px (1:1 ratio) */}
                             <img
                               src={member.imageUrl}
                               alt={member.altText}

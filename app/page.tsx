@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ProductCard } from "@/components/product-card"
@@ -73,10 +74,15 @@ export default function Home() {
             transform: `translateY(${scrollY * 0.5}px)`,
           }}
         >
-          <img
+          {/* Hero Image - Required: 1920x1080px (16:9 ratio) - Responsive */}
+          <Image
             src={heroImage}
             alt="House of Evolve Hero"
-            className="h-[120%] w-full object-cover scale-110"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover scale-110"
+            quality={85}
           />
           <div className="absolute inset-0 bg-black/40" />
         </div>
@@ -118,23 +124,27 @@ export default function Home() {
 
       {/* Rest of the sections remain the same */}
       {/* Categories Section */}
-      <section className="py-16 px-4">
+      <section className="py-8 sm:py-12 md:py-16 px-4">
         <div className="container mx-auto">
-          <h2 className="font-playfair text-3xl font-bold text-center mb-12">Shop by Category</h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <h2 className="font-playfair text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Shop by Category</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-4xl mx-auto">
             <Card className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg">
               <Link href="/category/sportswear">
                 <CardContent className="p-0">
-                  <div className="relative h-64 overflow-hidden">
-                    <img
+                  <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
+                    {/* Category Image - Required: 800x600px (4:3 ratio) - Responsive */}
+                    <Image
                       src={sportswearImage}
                       alt="Sportswear"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      quality={80}
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                       <div className="text-center text-white">
-                        <h3 className="font-playfair text-2xl font-bold mb-2">Sportswear</h3>
-                        <p className="text-sm opacity-90">Sustainable athletic wear</p>
+                        <h3 className="font-playfair text-xl sm:text-2xl font-bold mb-2">Sportswear</h3>
+                        <p className="text-xs sm:text-sm opacity-90">Sustainable athletic wear</p>
                       </div>
                     </div>
                   </div>
@@ -145,16 +155,20 @@ export default function Home() {
             <Card className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg">
               <Link href="/category/jewellery">
                 <CardContent className="p-0">
-                  <div className="relative h-64 overflow-hidden">
-                    <img
+                  <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
+                    {/* Category Image - Required: 800x600px (4:3 ratio) - Responsive */}
+                    <Image
                       src={jewelryImage}
                       alt="Jewelry"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      quality={80}
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                       <div className="text-center text-white">
-                        <h3 className="font-playfair text-2xl font-bold mb-2">Jewelry</h3>
-                        <p className="text-sm opacity-90">Ethically crafted accessories</p>
+                        <h3 className="font-playfair text-xl sm:text-2xl font-bold mb-2">Jewellery</h3>
+                        <p className="text-xs sm:text-sm opacity-90">Ethically crafted accessories</p>
                       </div>
                     </div>
                   </div>
@@ -166,11 +180,11 @@ export default function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-16 px-4 bg-muted/50">
+      <section className="py-8 sm:py-12 md:py-16 px-4 bg-muted/50">
         <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-playfair text-3xl font-bold mb-4">Featured Products</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="font-playfair text-2xl sm:text-3xl font-bold mb-4">Featured Products</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Discover our carefully curated selection of sustainable and stylish products
             </p>
           </div>
@@ -181,7 +195,7 @@ export default function Home() {
               <span className="ml-2">Loading featured products...</span>
             </div>
           ) : featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8">
               {featuredProducts.map((product: Product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -201,16 +215,16 @@ export default function Home() {
       </section>
 
       {/* Values Section */}
-      <section className="py-16 px-4">
+      <section className="py-8 sm:py-12 md:py-16 px-4">
         <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-playfair text-3xl font-bold mb-4">Our Values</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="font-playfair text-2xl sm:text-3xl font-bold mb-4">Our Values</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
               Everything we do is guided by our commitment to sustainability and ethical practices
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🌱</span>

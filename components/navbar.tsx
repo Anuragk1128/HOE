@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Search, ShoppingBag, Menu, X, User, Home, ShoppingCart, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,7 +16,7 @@ import { getLogoImage } from "@/lib/website-images-service";
 
 const categories = [
   { name: "All Products", path: "/shop" },
-  { name: "Jewelry", path: "/category/jewellery" },
+  { name: "Jewellery", path: "/category/jewellery" },
   { name: "Sportswear", path: "/category/sportswear" },
 ]
 
@@ -68,11 +69,17 @@ export function Navbar() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo - Responsive sizing */}
             <Link href="/" className="flex items-center space-x-2 min-w-0 flex-1">
-              <img 
-                src={logoImage} 
-                alt="House of Evolve Logo" 
-                className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 object-contain" 
-              />
+              {/* Logo Image - Required: 56x56px (1:1 ratio) - scales from 32px to 56px - Responsive */}
+              <div className="relative h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14">
+                <Image
+                  src={logoImage} 
+                  alt="House of Evolve Logo" 
+                  fill
+                  sizes="(max-width: 640px) 32px, (max-width: 768px) 40px, (max-width: 1024px) 48px, 56px"
+                  className="object-contain" 
+                  priority
+                />
+              </div>
               <span className="font-playfair text-sm sm:text-base md:text-lg lg:text-xl font-bold text-primary truncate">
                 House of Evolve
               </span>
