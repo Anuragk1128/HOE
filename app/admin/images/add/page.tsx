@@ -243,7 +243,7 @@ export default function AddImagePage() {
         formDataToSend.append("image", selectedFile);
       }
 
-      const response = await fetch("http://localhost:5000/api/admin/website-images", {
+      const response = await fetch("https://hoe.onrender.com/api/admin/website-images", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${adminToken}`,

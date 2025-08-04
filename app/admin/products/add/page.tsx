@@ -230,7 +230,7 @@ export default function AddProductPage() {
         formDataToSend.append("colors", formData.color[i]);
       }
 
-      const response = await fetch("http://localhost:5000/api/admin/products", {
+      const response = await fetch("https://hoe.onrender.com/api/admin/products", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${adminToken}`,

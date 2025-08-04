@@ -103,7 +103,7 @@ export default function EditProductPage() {
         setFetching(true);
         const adminToken = localStorage.getItem("adminToken");
         
-        const response = await fetch(`http://localhost:5000/api/admin/products/${productId}`, {
+        const response = await fetch(`https://hoe.onrender.com/api/admin/products/${productId}`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${adminToken}`,
@@ -329,7 +329,7 @@ export default function EditProductPage() {
         formDataToSend.append("colors", formData.color[i]);
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}`, {
+      const response = await fetch(`https://hoe.onrender.com/api/admin/products/${productId}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${adminToken}`,
