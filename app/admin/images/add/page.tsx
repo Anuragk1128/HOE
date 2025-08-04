@@ -330,7 +330,7 @@ export default function AddImagePage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category (Required for Category Hero Banners)
+                Category (Required for Category Hero Banner)
               </label>
               <select
                 name="category"
