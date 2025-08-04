@@ -65,13 +65,13 @@ export function CategoryHeroCarousel({ images, title, description, category }: C
             onClick={prevImage}
             className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white rounded-full p-1 sm:p-2 hover:bg-black/70 transition-all opacity-100 z-20"
           >
-            <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
+            <ChevronLeft className="h-3 w-3 sm:h-6 sm:w-6" />
           </button>
           <button
             onClick={nextImage}
             className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white rounded-full p-1 sm:p-2 hover:bg-black/70 transition-all opacity-100 z-20"
           >
-            <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
+            <ChevronRight className="h-3 w-3 sm:h-6 sm:w-6" />
           </button>
           
           {/* Image Dots Indicator */}
