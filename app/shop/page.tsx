@@ -39,7 +39,7 @@ export default function Shop() {
   }, [products])
 
   const genders = useMemo(() => {
-    const unique = [...new Set(products.map(p => p.gender))]
+    const unique = [...new Set(products.map(p => p.gender).filter(gender => gender && gender.trim() !== ""))]
     return ["all", ...unique]
   }, [products])
 
@@ -174,7 +174,7 @@ export default function Shop() {
               <SelectContent>
                 {genders.map((gender) => (
                   <SelectItem key={gender} value={gender}>
-                    {gender === "all" ? "All Genders" : gender.charAt(0).toUpperCase() + gender.slice(1)}
+                    {gender === "all" ? "All Genders" : (gender && gender.charAt ? gender.charAt(0).toUpperCase() + gender.slice(1) : gender)}
                   </SelectItem>
                 ))}
               </SelectContent>
