@@ -40,11 +40,11 @@ const imageTypes: ImageType[] = [
   },
   { 
     value: 'banner', 
-    label: 'Banner', 
-    description: 'Promotional and marketing banners',
-    requirements: ['Exact dimensions: 1200x600px (2:1 ratio)', 'Text overlay space', 'High contrast'],
-    usage: ['Promotional campaigns', 'Special offers', 'Newsletter headers'],
-    recommendedCount: 3
+    label: 'Category Hero Banner', 
+    description: 'Hero banner images for category pages (Jewellery/Sportswear)',
+    requirements: ['Exact dimensions: 1200x600px (2:1 ratio)', 'Text overlay space', 'High contrast', 'Category-specific content'],
+    usage: ['Jewellery category page hero', 'Sportswear category page hero'],
+    recommendedCount: 2
   },
   { 
     value: 'team', 
@@ -109,6 +109,7 @@ export default function AddImagePage() {
   const [formData, setFormData] = useState({
     name: "",
     type: "",
+    category: "",
     altText: "",
     description: "",
     isActive: true,
@@ -116,9 +117,11 @@ export default function AddImagePage() {
     order: 0
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [uploadMethod, setUploadMethod] = useState<"file" | "url">("file");
 
   const selectedImageType = imageTypes.find(type => type.value === formData.type);
 
@@ -146,6 +149,7 @@ export default function AddImagePage() {
       }
 
       setSelectedFile(file);
+      setImageUrl(""); // Clear URL when file is selected
       setError("");
 
       // Create preview URL
@@ -154,10 +158,54 @@ export default function AddImagePage() {
     }
   };
 
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setImageUrl(url);
+    setSelectedFile(null); // Clear file when URL is entered
+    
+    if (url) {
+      setPreviewUrl(url);
+      setError("");
+    } else {
+      setPreviewUrl("");
+    }
+  };
+
+  const addImageFromUrl = async () => {
+    if (imageUrl.trim()) {
+      try {
+        setLoading(true);
+        setError("");
+        
+        // Fetch the image from URL and convert to File object
+        const response = await fetch(imageUrl.trim());
+        if (!response.ok) {
+          throw new Error('Failed to fetch image');
+        }
+        
+        const blob = await response.blob();
+        const file = new File([blob], `image-${Date.now()}.jpg`, { type: blob.type });
+        
+        setSelectedFile(file);
+        setImageUrl(""); // Clear URL input
+        setPreviewUrl(imageUrl.trim()); // Keep preview
+        setError("");
+      } catch (error) {
+        console.error('Error fetching image:', error);
+        setError('Failed to fetch image from URL. Please check the URL and try again.');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setError("Please enter a valid image URL");
+    }
+  };
+
   const removeFile = () => {
     setSelectedFile(null);
+    setImageUrl("");
     setPreviewUrl("");
-    if (previewUrl) {
+    if (previewUrl && !imageUrl) {
       URL.revokeObjectURL(previewUrl);
     }
   };
@@ -165,8 +213,8 @@ export default function AddImagePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedFile) {
-      setError("Please select an image file");
+    if (!selectedFile && !imageUrl) {
+      setError("Please either upload a file or provide an image URL");
       return;
     }
 
@@ -184,15 +232,18 @@ export default function AddImagePage() {
 
       formDataToSend.append("name", formData.name);
       formDataToSend.append("type", formData.type);
+      formDataToSend.append("category", formData.category);
       formDataToSend.append("altText", formData.altText);
       formDataToSend.append("description", formData.description);
       formDataToSend.append("isActive", formData.isActive.toString());
       formDataToSend.append("isFeatured", formData.isFeatured.toString());
       formDataToSend.append("order", formData.order.toString());
       
-      formDataToSend.append("image", selectedFile);
+      if (selectedFile) {
+        formDataToSend.append("image", selectedFile);
+      }
 
-      const response = await fetch("http://localhost:5000/api/admin/website-images", {
+      const response = await fetch("https://hoe.onrender.com/api/admin/website-images", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${adminToken}`,
@@ -274,6 +325,23 @@ export default function AddImagePage() {
                     {type.label}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category (Required for Category Hero Banners)
+              </label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required={formData.type === 'banner'}
+              >
+                <option value="">Select category</option>
+                <option value="jewellery">Jewellery</option>
+                <option value="sportswear">Sportswear</option>
               </select>
             </div>
 
@@ -403,40 +471,111 @@ export default function AddImagePage() {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload Image</h2>
           
+          {/* Upload Method Toggle */}
+          <div className="mb-6">
+            <div className="flex space-x-4">
+              <button
+                type="button"
+                onClick={() => setUploadMethod("file")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  uploadMethod === "file"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Upload File
+              </button>
+              <button
+                type="button"
+                onClick={() => setUploadMethod("url")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  uploadMethod === "url"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Image URL
+              </button>
+            </div>
+          </div>
+          
           <div className="space-y-4">
-            {!selectedFile ? (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <label className="cursor-pointer">
-                  <span className="text-blue-600 hover:text-blue-500 font-medium">
-                    Click to upload
-                  </span>
-                  <span className="text-gray-500"> or drag and drop</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
-                <p className="text-sm text-gray-500 mt-2">
-                  PNG, JPG, GIF up to 5MB
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Upload className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-gray-700">{selectedFile.name}</span>
+            {uploadMethod === "file" ? (
+              // File Upload Section
+              !selectedFile ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <label className="cursor-pointer">
+                    <span className="text-blue-600 hover:text-blue-500 font-medium">
+                      Click to upload
+                    </span>
+                    <span className="text-gray-500"> or drag and drop</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-sm text-gray-500 mt-2">
+                    PNG, JPG, GIF up to 5MB
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Upload className="h-4 w-4 text-green-500" />
+                      <span className="text-sm text-gray-700">{selectedFile.name}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeFile}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={removeFile}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                  
+                  {previewUrl && (
+                    <div className="border rounded-lg p-4">
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="max-w-full h-auto max-h-64 mx-auto rounded"
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            ) : (
+              // URL Input Section
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Image URL <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex space-x-2">
+                    <input
+                      type="url"
+                      value={imageUrl}
+                      onChange={handleUrlChange}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://example.com/image.jpg"
+                      required={uploadMethod === "url"}
+                    />
+                    <button
+                      type="button"
+                      onClick={addImageFromUrl}
+                      disabled={loading || !imageUrl.trim()}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {loading ? "Adding..." : "Add Image"}
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Enter a direct link to an image (JPG, PNG, GIF, WebP) and click "Add Image"
+                  </p>
                 </div>
                 
                 {previewUrl && (

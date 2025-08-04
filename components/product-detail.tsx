@@ -56,9 +56,73 @@ export function ProductDetail({ product }: ProductDetailProps) {
             <p className="text-2xl font-semibold text-primary">{formatPrice(product.price)}</p>
           </div>
 
+          {/* Category-specific specifications */}
+          {product.category === 'jewellery' && product.jewelleryAttributes && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Jewellery Specifications</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {product.jewelleryAttributes.metalType && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Metal Type:</span>
+                    <p className="text-sm">
+                      {product.jewelleryAttributes.metalType}
+                      {product.jewelleryAttributes.purity && ` (${product.jewelleryAttributes.purity})`}
+                    </p>
+                  </div>
+                )}
+                {product.jewelleryAttributes.stoneType && product.jewelleryAttributes.stoneType !== 'None' && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Stone Type:</span>
+                    <p className="text-sm">
+                      {product.jewelleryAttributes.stoneType}
+                      {product.jewelleryAttributes.stoneQuality && ` (${product.jewelleryAttributes.stoneQuality})`}
+                    </p>
+                  </div>
+                )}
+                {product.jewelleryAttributes.weight && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Weight:</span>
+                    <p className="text-sm">{product.jewelleryAttributes.weight}g</p>
+                  </div>
+                )}
+                {product.jewelleryAttributes.designStyle && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Design Style:</span>
+                    <p className="text-sm">{product.jewelleryAttributes.designStyle}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {product.category === 'sportswear' && product.sportswearAttributes && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Sportswear Specifications</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {product.sportswearAttributes.material && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Material:</span>
+                    <p className="text-sm">{product.sportswearAttributes.material}</p>
+                  </div>
+                )}
+                {product.sportswearAttributes.fitType && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Fit Type:</span>
+                    <p className="text-sm">{product.sportswearAttributes.fitType}</p>
+                  </div>
+                )}
+                {product.sportswearAttributes.activityType && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Activity Type:</span>
+                    <p className="text-sm">{product.sportswearAttributes.activityType}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div>
             <p className="text-muted-foreground mb-4">{product.description}</p>
-            {product.details && <p className="text-sm text-muted-foreground">{product.details}</p>}
           </div>
 
           <Separator />

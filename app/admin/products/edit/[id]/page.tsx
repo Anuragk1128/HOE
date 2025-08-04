@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
 
@@ -33,15 +33,19 @@ interface ProductFormData {
   activityType: string;
 }
 
-export default function AddProductPage() {
+export default function EditProductPage() {
   const router = useRouter();
+  const params = useParams();
+  const productId = params.id as string;
+  
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [message, setMessage] = useState("");
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     price: 0,
     description: "",
-    image: [],  // Now stores File objects
+    image: [],
     category: "",
     subcategory: "",
     brand: "",
@@ -69,7 +73,9 @@ export default function AddProductPage() {
   const [newImage, setNewImage] = useState("");
   const [newSize, setNewSize] = useState("");
   const [newColor, setNewColor] = useState("");
-  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]); // For preview only
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [removedImages, setRemovedImages] = useState<string[]>([]); // Track removed images
 
   // Category-specific data
   const categoryData = {
@@ -90,6 +96,71 @@ export default function AddProductPage() {
     }
   };
 
+  // Fetch product data
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setFetching(true);
+        const adminToken = localStorage.getItem("adminToken");
+        
+        const response = await fetch(`https://hoe.onrender.com/api/admin/products/${productId}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${adminToken}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const product = data.product;
+          
+          setFormData({
+            name: product.name || "",
+            price: product.price || 0,
+            description: product.description || "",
+            image: [],
+            category: product.category || "",
+            subcategory: product.subcategory || "",
+            brand: product.brand || "",
+            gender: product.gender || "",
+            stock: product.stock || 0,
+            size: product.size || [],
+            color: product.color || [],
+            rating: product.rating || 0,
+            reviews: product.reviews || [],
+            isFeatured: product.isFeatured || false,
+            isActive: product.isActive !== undefined ? product.isActive : true,
+            // Jewellery specific attributes
+            metalType: product.jewelleryAttributes?.metalType || "",
+            purity: product.jewelleryAttributes?.purity || "",
+            stoneType: product.jewelleryAttributes?.stoneType || "",
+            stoneQuality: product.jewelleryAttributes?.stoneQuality || "",
+            weight: product.jewelleryAttributes?.weight || 0,
+            designStyle: product.jewelleryAttributes?.designStyle || "",
+            // Sportswear specific attributes
+            material: product.sportswearAttributes?.material || "",
+            fitType: product.sportswearAttributes?.fitType || "",
+            activityType: product.sportswearAttributes?.activityType || "",
+          });
+          
+          setExistingImages(product.image || []);
+          setImagePreviewUrls(product.image || []);
+        } else {
+          setMessage("Failed to fetch product data");
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        setMessage("Network error. Please try again.");
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    if (productId) {
+      fetchProduct();
+    }
+  }, [productId]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -104,6 +175,15 @@ export default function AddProductPage() {
       image: prev.image.filter((_, i) => i !== index)
     }));
     setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    const imageToRemove = existingImages[index];
+    
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+    setRemovedImages(prev => [...prev, imageToRemove]);
+    setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
+    setMessage(""); // Clear any previous error message
   };
 
   const addSize = () => {
@@ -142,7 +222,6 @@ export default function AddProductPage() {
 
   const addImage = () => {
     if (newImage.trim()) {
-      // For URL images, we'll need to fetch them as files
       fetch(newImage.trim())
         .then(response => response.blob())
         .then(blob => {
@@ -172,7 +251,21 @@ export default function AddProductPage() {
     if (!formData.name.trim()) missingFields.push("Product Name");
     if (!formData.price || formData.price <= 0) missingFields.push("Price");
     if (!formData.description.trim()) missingFields.push("Description");
-    if (formData.image.length === 0) missingFields.push("Product Images");
+    
+    // Check if at least one image will remain
+    const remainingExistingImages = existingImages.length - removedImages.length;
+    const totalImages = remainingExistingImages + formData.image.length;
+    
+    console.log('Image validation:', {
+      existingImages: existingImages.length,
+      removedImages: removedImages.length,
+      newImages: formData.image.length,
+      remainingExisting: remainingExistingImages,
+      totalImages: totalImages
+    });
+    
+    if (totalImages === 0) missingFields.push("Product Images (at least one image required)");
+    
     if (!formData.category) missingFields.push("Category");
     if (!formData.subcategory) missingFields.push("Subcategory");
     if (!formData.brand) missingFields.push("Brand");
@@ -204,6 +297,16 @@ export default function AddProductPage() {
       formDataToSend.append("isActive", formData.isActive.toString());
       formDataToSend.append("isFeatured", formData.isFeatured.toString());
 
+      // Add removed images data
+      if (removedImages.length > 0) {
+        formDataToSend.append("removedImages", JSON.stringify(removedImages));
+      }
+
+      // Add new images
+      for (let i = 0; i < formData.image.length; i++) {
+        formDataToSend.append("images", formData.image[i]);
+      }
+
       // Add category-specific attributes
       if (formData.category === 'jewellery') {
         formDataToSend.append("metalType", formData.metalType);
@@ -218,10 +321,6 @@ export default function AddProductPage() {
         formDataToSend.append("activityType", formData.activityType);
       }
 
-      for (let i = 0; i < formData.image.length; i++) {
-        formDataToSend.append("images", formData.image[i]);
-      }
-
       for (let i = 0; i < formData.size.length; i++) {
         formDataToSend.append("sizes", formData.size[i]);
       }
@@ -230,8 +329,8 @@ export default function AddProductPage() {
         formDataToSend.append("colors", formData.color[i]);
       }
 
-      const response = await fetch("https://hoe.onrender.com/api/admin/products", {
-        method: "POST",
+      const response = await fetch(`https://hoe.onrender.com/api/admin/products/${productId}`, {
+        method: "PUT",
         headers: {
           "Authorization": `Bearer ${adminToken}`,
         },
@@ -241,20 +340,46 @@ export default function AddProductPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Product created successfully!");
+        setMessage("Product updated successfully!");
         setTimeout(() => {
           router.push("/admin/products");
         }, 1500);
       } else {
-        setMessage(data.message || "Failed to create product");
+        setMessage(data.message || "Failed to update product");
       }
     } catch (error) {
-      console.log("Error creating product:", error);
+      console.log("Error updating product:", error);
       setMessage("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  if (fetching) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link
+              href="/admin/products"
+              className="flex items-center text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Products
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Edit Product</h1>
+              <p className="text-gray-600 mt-2">Loading product data...</p>
+            </div>
+          </div>
+        </div>
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading product details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -268,8 +393,8 @@ export default function AddProductPage() {
             Back to Products
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Add New Product</h1>
-            <p className="text-gray-600 mt-2">Create a new product for your store</p>
+            <h1 className="text-3xl font-bold text-gray-900">Edit Product</h1>
+            <p className="text-gray-600 mt-2">Update product information</p>
           </div>
         </div>
       </div>
@@ -553,9 +678,51 @@ export default function AddProductPage() {
           {/* Images */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Product Images *
+              Product Images
             </label>
-            <div className={`space-y-4 ${formData.image.length === 0 ? 'border-2 border-red-300 rounded-lg p-4 bg-red-50' : ''}`}>
+            <div className="space-y-4">
+              {/* Existing Images */}
+              {existingImages.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Current Images ({existingImages.length})</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {existingImages.map((img, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={img}
+                          alt={`Product ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/placeholder.svg";
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeExistingImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
+                          {index + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {removedImages.length > 0 && (
+                    <p className="text-xs text-orange-600 mt-2">
+                      {removedImages.length} image(s) will be removed on save
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-2">
+                    You can remove all existing images, but at least one image is required for the product.
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Current images: {existingImages.length - removedImages.length} existing + {formData.image.length} new = {existingImages.length - removedImages.length + formData.image.length} total
+                  </p>
+                </div>
+              )}
+
               {/* File Upload */}
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
                 <input
@@ -580,23 +747,28 @@ export default function AddProductPage() {
                     <svg className="h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
-                    <p className="text-lg font-medium text-gray-900 mb-2">Upload Images</p>
-                    <p className="text-sm text-gray-500">Click to select images from your device</p>
+                    <p className="text-lg font-medium text-gray-900 mb-2">Add More Images</p>
+                    <p className="text-sm text-gray-500">Click to select additional images</p>
                     <p className="text-xs text-gray-400 mt-1">Supports: JPG, PNG, GIF, WebP</p>
                   </div>
                 </label>
               </div>
+              
+              {/* Image count indicator */}
+              <p className="text-xs text-blue-600 mt-2">
+                Current images: {existingImages.length - removedImages.length} existing + {formData.image.length} new = {existingImages.length - removedImages.length + formData.image.length} total
+              </p>
 
-              {/* Image Preview */}
-              {imagePreviewUrls.length > 0 && (
+              {/* New Image Preview */}
+              {formData.image.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Images ({imagePreviewUrls.length})</p>
+                  <p className="text-sm font-medium text-gray-700 mb-2">New Images ({formData.image.length})</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {imagePreviewUrls.map((img, index) => (
+                    {imagePreviewUrls.slice(existingImages.length).map((img, index) => (
                       <div key={index} className="relative group">
                         <img
                           src={img}
-                          alt={`Product ${index + 1}`}
+                          alt={`New Product ${index + 1}`}
                           className="w-full h-24 object-cover rounded-lg border border-gray-200"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "/placeholder.svg";
@@ -610,7 +782,7 @@ export default function AddProductPage() {
                           <X className="h-3 w-3" />
                         </button>
                         <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
-                          {index + 1}
+                          New {index + 1}
                         </div>
                       </div>
                     ))}
@@ -639,9 +811,6 @@ export default function AddProductPage() {
                 </div>
               </div>
             </div>
-            {formData.image.length === 0 && (
-              <p className="mt-1 text-sm text-red-600">At least one product image is required</p>
-            )}
           </div>
 
           {/* Sizes - Only for Sportswear */}
@@ -960,7 +1129,7 @@ export default function AddProductPage() {
               disabled={loading}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {loading ? "Creating..." : "Create Product"}
+              {loading ? "Updating..." : "Update Product"}
             </button>
           </div>
         </form>

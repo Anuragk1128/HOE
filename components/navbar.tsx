@@ -66,16 +66,16 @@ export function Navbar() {
     <>
       <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo - Responsive sizing */}
-            <Link href="/" className="flex items-center space-x-2 min-w-0 flex-1">
-              {/* Logo Image - Required: 56x56px (1:1 ratio) - scales from 32px to 56px - Responsive */}
-              <div className="relative h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14">
+          <div className="flex h-10 items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-2 min-w-0">
+              {/* Logo Image - Required: 48x48px (1:1 ratio) - scales from 28px to 48px - Responsive */}
+              <div className="relative h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 lg:h-10 lg:w-10">
                 <Image
                   src={logoImage} 
                   alt="House of Evolve Logo" 
                   fill
-                  sizes="(max-width: 640px) 32px, (max-width: 768px) 40px, (max-width: 1024px) 48px, 56px"
+                  sizes="(max-width: 640px) 28px, (max-width: 768px) 32px, (max-width: 1024px) 36px, 40px"
                   className="object-contain" 
                   priority
                 />
@@ -85,8 +85,8 @@ export function Navbar() {
               </span>
             </Link>
 
-            {/* Desktop Navigation - Hidden on mobile */}
-            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+            {/* Desktop Navigation - Centered */}
+            <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
               {categories.map((category) => (
                 <Link
                   key={category.name}
@@ -99,15 +99,15 @@ export function Navbar() {
             </div>
 
             {/* Right side actions */}
-            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-3">
               {/* Search - Hidden on very small screens, shown on sm+ */}
               <form onSubmit={handleSearch} className="hidden sm:flex lg:flex">
                 <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="search"
                     placeholder="Search products..."
-                    className="w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px] pl-8 text-sm"
+                    className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] pl-8 text-sm h-8"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -115,10 +115,10 @@ export function Navbar() {
               </form>
 
               {/* Cart Button */}
-              <Button variant="ghost" size="icon" onClick={toggleCart} className="relative">
-                <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Button variant="ghost" size="sm" onClick={toggleCart} className="relative h-8 w-8 p-0">
+                <ShoppingBag className="h-4 w-4" />
                 {totalItems > 0 && (
-                  <Badge variant="destructive" className="absolute -right-1 -top-1 sm:-right-2 sm:-top-2 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 text-xs">
+                  <Badge variant="destructive" className="absolute -right-1 -top-1 h-4 w-4 rounded-full p-0 text-xs">
                     {totalItems}
                   </Badge>
                 )}
@@ -148,12 +148,12 @@ export function Navbar() {
               {/* Mobile Menu Button */}
               <Button 
                 variant="ghost" 
-                size="icon" 
-                className="lg:hidden" 
+                size="sm" 
+                className="lg:hidden h-8 w-8 p-0" 
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle mobile menu"
               >
-                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               </Button>
             </div>
           </div>

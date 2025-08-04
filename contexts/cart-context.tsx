@@ -9,9 +9,26 @@ export interface Product {
   name: string
   price: number
   image: string
+  images?: string[] // Array of all product images
   category: string
+  subcategory: string
+  brand: string
+  gender: string
   description?: string
   details?: string
+  jewelleryAttributes?: {
+    metalType?: string;
+    purity?: string;
+    stoneType?: string;
+    stoneQuality?: string;
+    weight?: number;
+    designStyle?: string;
+  };
+  sportswearAttributes?: {
+    material?: string;
+    fitType?: string;
+    activityType?: string;
+  };
 }
 
 export interface CartItem extends Product {

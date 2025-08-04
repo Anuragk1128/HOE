@@ -47,7 +47,7 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/admin/products", {
+      const response = await fetch("https://hoe.onrender.com/api/admin/products", {
         headers: {
           "Authorization": `Bearer ${adminToken}`,
           "Content-Type": "application/json",
@@ -73,7 +73,7 @@ export default function AdminProductsPage() {
 
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}`, {
+      const response = await fetch(`https://hoe.onrender.com/api/admin/products/${productId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${adminToken}`,
@@ -95,7 +95,7 @@ export default function AdminProductsPage() {
   const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}`, {
+      const response = await fetch(`https://hoe.onrender.com/api/admin/products/${productId}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${adminToken}`,

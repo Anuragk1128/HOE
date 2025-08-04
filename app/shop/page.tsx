@@ -17,12 +17,31 @@ export default function Shop() {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedSubcategory, setSelectedSubcategory] = useState("all")
+  const [selectedBrand, setSelectedBrand] = useState("all")
+  const [selectedGender, setSelectedGender] = useState("all")
   const [sortBy, setSortBy] = useState("name")
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
   const categories = ["all", "jewellery", "sportswear"]
+  
+  // Get unique values for filters
+  const subcategories = useMemo(() => {
+    const unique = [...new Set(products.map(p => p.subcategory))]
+    return ["all", ...unique]
+  }, [products])
+
+  const brands = useMemo(() => {
+    const unique = [...new Set(products.map(p => p.brand))]
+    return ["all", ...unique]
+  }, [products])
+
+  const genders = useMemo(() => {
+    const unique = [...new Set(products.map(p => p.gender))]
+    return ["all", ...unique]
+  }, [products])
 
   // Fetch products from backend
   useEffect(() => {
@@ -50,7 +69,23 @@ export default function Shop() {
         }
         
         const fetchedProducts = await getProductsWithFilters(params)
-        setProducts(fetchedProducts)
+        
+        // Apply additional filters on frontend
+        let filteredProducts = fetchedProducts
+        
+        if (selectedSubcategory !== "all") {
+          filteredProducts = filteredProducts.filter(p => p.subcategory === selectedSubcategory)
+        }
+        
+        if (selectedBrand !== "all") {
+          filteredProducts = filteredProducts.filter(p => p.brand === selectedBrand)
+        }
+        
+        if (selectedGender !== "all") {
+          filteredProducts = filteredProducts.filter(p => p.gender === selectedGender)
+        }
+        
+        setProducts(filteredProducts)
       } catch (error) {
         console.error("Error fetching products:", error)
         setError("Failed to load products. Please try again.")
@@ -60,7 +95,7 @@ export default function Shop() {
     }
 
     fetchProducts()
-  }, [searchQuery, selectedCategory, sortBy])
+  }, [searchQuery, selectedCategory, selectedSubcategory, selectedBrand, selectedGender, sortBy])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -106,6 +141,45 @@ export default function Shop() {
               </SelectContent>
             </Select>
 
+            <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Subcategory" />
+              </SelectTrigger>
+              <SelectContent>
+                {subcategories.map((subcategory) => (
+                  <SelectItem key={subcategory} value={subcategory}>
+                    {subcategory === "all" ? "All Subcategories" : subcategory}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Brand" />
+              </SelectTrigger>
+              <SelectContent>
+                {brands.map((brand) => (
+                  <SelectItem key={brand} value={brand}>
+                    {brand === "all" ? "All Brands" : brand}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedGender} onValueChange={setSelectedGender}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Gender" />
+              </SelectTrigger>
+              <SelectContent>
+                {genders.map((gender) => (
+                  <SelectItem key={gender} value={gender}>
+                    {gender === "all" ? "All Genders" : gender.charAt(0).toUpperCase() + gender.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Sort by" />
@@ -132,6 +206,30 @@ export default function Shop() {
               <Badge variant="secondary" className="flex items-center gap-1">
                 Category: {selectedCategory}
                 <button onClick={() => setSelectedCategory("all")} className="ml-1 hover:text-destructive">
+                  ×
+                </button>
+              </Badge>
+            )}
+            {selectedSubcategory !== "all" && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Subcategory: {selectedSubcategory}
+                <button onClick={() => setSelectedSubcategory("all")} className="ml-1 hover:text-destructive">
+                  ×
+                </button>
+              </Badge>
+            )}
+            {selectedBrand !== "all" && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Brand: {selectedBrand}
+                <button onClick={() => setSelectedBrand("all")} className="ml-1 hover:text-destructive">
+                  ×
+                </button>
+              </Badge>
+            )}
+            {selectedGender !== "all" && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Gender: {selectedGender}
+                <button onClick={() => setSelectedGender("all")} className="ml-1 hover:text-destructive">
                   ×
                 </button>
               </Badge>
@@ -188,6 +286,9 @@ export default function Shop() {
                 onClick={() => {
                   setSearchQuery("")
                   setSelectedCategory("all")
+                  setSelectedSubcategory("all")
+                  setSelectedBrand("all")
+                  setSelectedGender("all")
                   setSortBy("name")
                 }}
               >

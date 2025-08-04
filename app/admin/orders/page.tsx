@@ -26,7 +26,7 @@ export default function AdminOrdersPage() {
     const fetchOrders = async () => {
       try {
         const adminToken = localStorage.getItem("adminToken");
-        const response = await fetch("http://localhost:5000/api/admin/orders", {
+        const response = await fetch("https://hoe.onrender.com/api/admin/orders", {
           headers: {
             "Authorization": `Bearer ${adminToken}`,
             "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export default function AdminOrdersPage() {
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
+              const response = await fetch(`https://hoe.onrender.com/api/admin/orders/${orderId}/status`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${adminToken}`,

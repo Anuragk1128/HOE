@@ -70,7 +70,7 @@ export default function EditImagePage() {
   const fetchImage = async () => {
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/admin/website-images/${imageId}`, {
+      const response = await fetch(`https://hoe.onrender.com/api/admin/website-images/${imageId}`, {
         headers: {
           "Authorization": `Bearer ${adminToken}`,
           "Content-Type": "application/json",
@@ -172,7 +172,7 @@ export default function EditImagePage() {
         formDataToSend.append("image", selectedFile);
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/website-images/${imageId}`, {
+      const response = await fetch(`https://hoe.onrender.com/api/admin/website-images/${imageId}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${adminToken}`,

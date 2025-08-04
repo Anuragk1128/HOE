@@ -23,7 +23,7 @@ export default function AdminUsersPage() {
     const fetchUsers = async () => {
       try {
         const adminToken = localStorage.getItem("adminToken");
-        const response = await fetch("http://localhost:5000/api/admin/users", {
+        const response = await fetch("https://hoe.onrender.com/api/admin/users", {
           headers: {
             "Authorization": `Bearer ${adminToken}`,
             "Content-Type": "application/json",

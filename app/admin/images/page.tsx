@@ -41,10 +41,10 @@ const imageTypes = [
   },
   { 
     value: 'banner', 
-    label: 'Banner', 
+    label: 'Category Hero Banner', 
     color: 'bg-yellow-100 text-yellow-800',
     dimensions: '1200x600px (2:1 ratio)',
-    description: 'Category page hero banners'
+    description: 'Category page hero banners (Jewellery/Sportswear)'
   },
   { 
     value: 'team', 
@@ -128,7 +128,7 @@ export default function AdminImagesPage() {
   const fetchImages = async () => {
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await fetch("http://localhost:5000/api/admin/website-images", {
+      const response = await fetch("https://hoe.onrender.com/api/admin/website-images", {
         headers: {
           "Authorization": `Bearer ${adminToken}`,
           "Content-Type": "application/json",
@@ -154,7 +154,7 @@ export default function AdminImagesPage() {
 
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/admin/website-images/${imageId}`, {
+      const response = await fetch(`https://hoe.onrender.com/api/admin/website-images/${imageId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${adminToken}`,
@@ -176,7 +176,7 @@ export default function AdminImagesPage() {
   const toggleImageStatus = async (imageId: string, currentStatus: boolean) => {
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:5000/api/admin/website-images/${imageId}`, {
+      const response = await fetch(`https://hoe.onrender.com/api/admin/website-images/${imageId}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${adminToken}`,
