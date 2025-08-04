@@ -41,10 +41,10 @@ const imageTypes = [
   },
   { 
     value: 'banner', 
-    label: 'Banner', 
+    label: 'Category Hero Banner', 
     color: 'bg-yellow-100 text-yellow-800',
     dimensions: '1200x600px (2:1 ratio)',
-    description: 'Category page hero banners'
+    description: 'Category page hero banners (Jewellery/Sportswear)'
   },
   { 
     value: 'team', 

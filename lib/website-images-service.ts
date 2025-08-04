@@ -87,14 +87,35 @@ export const getLogoImage = async (): Promise<WebsiteImage | null> => {
 // Get category image for a specific category
 export const getCategoryImage = async (category: string): Promise<WebsiteImage | null> => {
   try {
-    const categoryImages = await fetchWebsiteImagesByType("category");
-    const categoryImage = categoryImages.find(img => 
+    const bannerImages = await fetchWebsiteImagesByType("banner");
+    // Find the first active banner image for this category, prioritizing featured ones
+    const categoryImage = bannerImages.find(img => 
       img.isActive && img.category === category
     );
     return categoryImage || null;
   } catch (error) {
     console.error("Error fetching category image:", error);
     return null;
+  }
+};
+
+// Get all category images for a specific category (for future use)
+export const getAllCategoryImages = async (category: string): Promise<WebsiteImage[]> => {
+  try {
+    const bannerImages = await fetchWebsiteImagesByType("banner");
+    // Return all active banner images for this category, sorted by featured first, then by order
+    return bannerImages
+      .filter(img => img.isActive && img.category === category)
+      .sort((a, b) => {
+        // Featured images first
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        // Then by order
+        return a.order - b.order;
+      });
+  } catch (error) {
+    console.error("Error fetching category images:", error);
+    return [];
   }
 };
 

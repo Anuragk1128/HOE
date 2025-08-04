@@ -8,12 +8,28 @@ interface BackendProduct {
   description: string;
   image: string[];
   category: string;
+  subcategory: string;
+  brand: string;
+  gender: string;
   stock: number;
   size: string[];
   color: string[];
   rating: number;
   isFeatured: boolean;
   isActive: boolean;
+  jewelleryAttributes?: {
+    metalType?: string;
+    purity?: string;
+    stoneType?: string;
+    stoneQuality?: string;
+    weight?: number;
+    designStyle?: string;
+  };
+  sportswearAttributes?: {
+    material?: string;
+    fitType?: string;
+    activityType?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -25,9 +41,15 @@ const convertBackendProduct = (backendProduct: BackendProduct): Product => {
     name: backendProduct.name,
     price: backendProduct.price,
     image: backendProduct.image[0] || "/placeholder.svg", // Use first image as main image
+    images: backendProduct.image, // Include all images
     category: backendProduct.category,
+    subcategory: backendProduct.subcategory,
+    brand: backendProduct.brand,
+    gender: backendProduct.gender,
     description: backendProduct.description,
     details: `${backendProduct.description}. Available in sizes: ${backendProduct.size.join(', ')}. Colors: ${backendProduct.color.join(', ')}.`,
+    jewelleryAttributes: backendProduct.jewelleryAttributes,
+    sportswearAttributes: backendProduct.sportswearAttributes,
   };
 };
 

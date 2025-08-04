@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllProducts, createProduct, updateProduct, deleteProduct, getCategories, uploadImages } from "../controllers/adminProductController.js";
+import { getAllProducts, createProduct, updateProduct, deleteProduct, getCategories, getProductById, uploadImages } from "../controllers/adminProductController.js";
 import adminAuth from "../middleware/adminAuth.js";
 
 const adminProductRouter = express.Router();
@@ -9,8 +9,9 @@ adminProductRouter.use(adminAuth);
 
 // Product CRUD operations
 adminProductRouter.get("/products", getAllProducts);
+adminProductRouter.get("/products/:id", getProductById);
 adminProductRouter.post("/products", uploadImages, createProduct);
-adminProductRouter.put("/products/:id", updateProduct);
+adminProductRouter.put("/products/:id", uploadImages, updateProduct);
 adminProductRouter.delete("/products/:id", deleteProduct);
 
 // Categories

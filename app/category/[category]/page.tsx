@@ -2,9 +2,9 @@ import { notFound } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
-import { Badge } from "@/components/ui/badge"
+import { CategoryHeroCarousel } from "@/components/category-hero-carousel"
 import { fetchProductsByCategory } from "@/lib/products-service"
-import { getCategoryImage } from "@/lib/website-images-service"
+import { getAllCategoryImages } from "@/lib/website-images-service"
 import type { Product } from "@/contexts/cart-context"
 
 interface CategoryPageProps {
@@ -36,18 +36,18 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const info = categoryInfo[category as keyof typeof categoryInfo]
 
-  // Fetch products and image for this category
+  // Fetch products and images for this category
   let products: Product[] = []
-  let categoryImage = info.image
+  let categoryImages: string[] = [info.image] // Start with default image
 
   try {
     // Fetch products
     products = await fetchProductsByCategory(category)
     
-    // Fetch category image
-    const image = await getCategoryImage(category)
-    if (image) {
-      categoryImage = image.imageUrl
+    // Fetch all category images
+    const images = await getAllCategoryImages(category)
+    if (images.length > 0) {
+      categoryImages = images.map(img => img.imageUrl)
     }
   } catch (error) {
     console.error("Error loading category data:", error)
@@ -59,21 +59,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <Navbar />
 
       <div className="flex-1">
-        {/* Category Hero */}
-        <section className="relative h-[40vh] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0">
-            {/* Category Hero Image - Required: 1200x600px (2:1 ratio) */}
-            <img src={categoryImage || "/placeholder.svg"} alt={info.title} className="h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-black/50" />
-          </div>
-          <div className="relative z-10 text-center text-white px-4">
-            <Badge variant="secondary" className="mb-4 capitalize bg-white/20 text-white border-white/30">
-              {category}
-            </Badge>
-            <h1 className="font-playfair text-4xl md:text-5xl font-bold mb-4">{info.title}</h1>
-            <p className="text-lg md:text-xl max-w-2xl mx-auto opacity-90">{info.description}</p>
-          </div>
-        </section>
+        {/* Category Hero Carousel */}
+        <CategoryHeroCarousel 
+          images={categoryImages}
+          title={info.title}
+          description={info.description}
+          category={category}
+        />
 
         {/* Products Section */}
         <section className="py-16 px-4">
