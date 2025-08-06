@@ -1,47 +1,37 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Search, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { getProductsWithFilters } from "@/lib/products-service"
 import type { Product } from "@/contexts/cart-context"
 
 export default function Shop() {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [selectedSubcategory, setSelectedSubcategory] = useState("all")
-  const [selectedBrand, setSelectedBrand] = useState("all")
-  const [selectedGender, setSelectedGender] = useState("all")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([])
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
+  const [selectedGenders, setSelectedGenders] = useState<string[]>([])
+  const [showAllCategories, setShowAllCategories] = useState(false)
+  const [showAllSubcategories, setShowAllSubcategories] = useState(false)
+  const [showAllBrands, setShowAllBrands] = useState(false)
+  const [showAllGenders, setShowAllGenders] = useState(false)
   const [sortBy, setSortBy] = useState("name")
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const categories = ["all", "jewellery", "sportswear"]
-  
-  // Get unique values for filters
-  const subcategories = useMemo(() => {
-    const unique = [...new Set(products.map(p => p.subcategory))]
-    return ["all", ...unique]
-  }, [products])
-
-  const brands = useMemo(() => {
-    const unique = [...new Set(products.map(p => p.brand))]
-    return ["all", ...unique]
-  }, [products])
-
-  const genders = useMemo(() => {
-    const unique = [...new Set(products.map(p => p.gender).filter(gender => gender && gender.trim() !== ""))]
-    return ["all", ...unique]
-  }, [products])
+  // Unique filter options
+  const categoryOptions = Array.from(new Set(products.map(p => p.category))).filter(Boolean)
+  const subcategoryOptions = Array.from(new Set(products.map(p => p.subcategory))).filter(Boolean)
+  const brandOptions = Array.from(new Set(products.map(p => p.brand))).filter(Boolean)
+  const genderOptions = Array.from(new Set(products.map(p => p.gender))).filter(Boolean)
 
   // Fetch products from backend
   useEffect(() => {
@@ -49,43 +39,11 @@ export default function Shop() {
       try {
         setLoading(true)
         setError("")
-        
-        const params: {
-          category?: string;
-          search?: string;
-          sort?: string;
-        } = {}
-        
-        if (selectedCategory !== "all") {
-          params.category = selectedCategory
-        }
-        
-        if (searchQuery) {
-          params.search = searchQuery
-        }
-        
-        if (sortBy) {
-          params.sort = sortBy
-        }
-        
+        const params: { search?: string; sort?: string } = {}
+        if (searchQuery) params.search = searchQuery
+        if (sortBy) params.sort = sortBy
         const fetchedProducts = await getProductsWithFilters(params)
-        
-        // Apply additional filters on frontend
-        let filteredProducts = fetchedProducts
-        
-        if (selectedSubcategory !== "all") {
-          filteredProducts = filteredProducts.filter(p => p.subcategory === selectedSubcategory)
-        }
-        
-        if (selectedBrand !== "all") {
-          filteredProducts = filteredProducts.filter(p => p.brand === selectedBrand)
-        }
-        
-        if (selectedGender !== "all") {
-          filteredProducts = filteredProducts.filter(p => p.gender === selectedGender)
-        }
-        
-        setProducts(filteredProducts)
+        setProducts(fetchedProducts)
       } catch (error) {
         console.error("Error fetching products:", error)
         setError("Failed to load products. Please try again.")
@@ -93,16 +51,23 @@ export default function Shop() {
         setLoading(false)
       }
     }
-
     fetchProducts()
-  }, [searchQuery, selectedCategory, selectedSubcategory, selectedBrand, selectedGender, sortBy])
+  }, [searchQuery, sortBy])
+
+  // Filtering logic
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category)
+    const matchesSubcategory = selectedSubcategories.length === 0 || selectedSubcategories.includes(product.subcategory)
+    const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brand)
+    const matchesGender = selectedGenders.length === 0 || selectedGenders.includes(product.gender)
+    return matchesCategory && matchesSubcategory && matchesBrand && matchesGender
+  })
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-
       <div className="flex-1">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-2 sm:px-4 py-8">
           {/* Header */}
           <div className="mb-8">
             <h1 className="font-playfair text-3xl font-bold mb-4">
@@ -110,195 +75,160 @@ export default function Shop() {
             </h1>
             <p className="text-muted-foreground">
               {searchQuery 
-                ? `Found ${products.length} product${products.length !== 1 ? 's' : ''} matching your search`
+                ? `Found ${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} matching your search`
                 : "Discover our complete collection of sustainable and stylish products"
               }
             </p>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          {/* Main Content: Sidebar + Grid */}
+          <div className="flex flex-row gap-4 min-h-[60vh]">
+            {/* Sidebar Filters */}
+            <aside className="w-32 md:w-56 max-h-[80vh] overflow-y-auto flex-shrink-0 bg-white rounded-lg border p-2 md:p-4 shadow-sm text-xs md:text-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">Filters</h2>
+                <button className="text-sm text-primary font-semibold" onClick={() => {
+                  setSelectedCategories([])
+                  setSelectedSubcategories([])
+                  setSelectedBrands([])
+                  setSelectedGenders([])
+                }}>CLEAR ALL</button>
+              </div>
+              {/* Category Filter */}
+              <div className="mb-6">
+                <div className="font-semibold text-sm mb-2">Category</div>
+                {(showAllCategories ? categoryOptions : categoryOptions.slice(0, 5)).map(cat => (
+                  <label key={cat} className="flex items-center mb-1 cursor-pointer text-sm">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(cat)}
+                      onChange={() => setSelectedCategories(selectedCategories.includes(cat)
+                        ? selectedCategories.filter(c => c !== cat)
+                        : [...selectedCategories, cat])}
+                      className="mr-2"
+                    />
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)} <span className="ml-1 text-muted-foreground">({products.filter(p => p.category === cat).length})</span>
+                  </label>
+                ))}
+                {categoryOptions.length > 5 && (
+                  <button className="text-xs text-primary mt-1" onClick={() => setShowAllCategories(v => !v)}>
+                    {showAllCategories ? 'Show Less' : `\t${categoryOptions.length - 5} More`}
+                  </button>
+                )}
             </div>
-
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category === "all" ? "All Categories" : category.charAt(0).toUpperCase() + category.slice(1)}
-                  </SelectItem>
+              {/* Subcategory Filter */}
+              <div className="mb-6">
+                <div className="font-semibold text-sm mb-2">Subcategory</div>
+                {(showAllSubcategories ? subcategoryOptions : subcategoryOptions.slice(0, 5)).map(sub => (
+                  <label key={sub} className="flex items-center mb-1 cursor-pointer text-sm">
+                    <input
+                      type="checkbox"
+                      checked={selectedSubcategories.includes(sub)}
+                      onChange={() => setSelectedSubcategories(selectedSubcategories.includes(sub)
+                        ? selectedSubcategories.filter(s => s !== sub)
+                        : [...selectedSubcategories, sub])}
+                      className="mr-2"
+                    />
+                    {sub} <span className="ml-1 text-muted-foreground">({products.filter(p => p.subcategory === sub).length})</span>
+                  </label>
                 ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Subcategory" />
-              </SelectTrigger>
-              <SelectContent>
-                {subcategories.map((subcategory) => (
-                  <SelectItem key={subcategory} value={subcategory}>
-                    {subcategory === "all" ? "All Subcategories" : subcategory}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedBrand} onValueChange={setSelectedBrand}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Brand" />
-              </SelectTrigger>
-              <SelectContent>
-                {brands.map((brand) => (
-                  <SelectItem key={brand} value={brand}>
-                    {brand === "all" ? "All Brands" : brand}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedGender} onValueChange={setSelectedGender}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Gender" />
-              </SelectTrigger>
-              <SelectContent>
-                {genders.map((gender) => (
-                  <SelectItem key={gender} value={gender}>
-                    {gender === "all" ? "All Genders" : (gender && gender.charAt ? gender.charAt(0).toUpperCase() + gender.slice(1) : gender)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
+                {subcategoryOptions.length > 5 && (
+                  <button className="text-xs text-primary mt-1" onClick={() => setShowAllSubcategories(v => !v)}>
+                    {showAllSubcategories ? 'Show Less' : `\t${subcategoryOptions.length - 5} More`}
+                  </button>
+                )}
           </div>
-
-          {/* Active Filters */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {searchQuery && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Search: {searchQuery}
-                <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-destructive">
-                  ×
+              {/* Brand Filter */}
+              <div className="mb-6">
+                <div className="font-semibold text-sm mb-2">Brand</div>
+                {(showAllBrands ? brandOptions : brandOptions.slice(0, 5)).map(brand => (
+                  <label key={brand} className="flex items-center mb-1 cursor-pointer text-sm">
+                    <input
+                      type="checkbox"
+                      checked={selectedBrands.includes(brand)}
+                      onChange={() => setSelectedBrands(selectedBrands.includes(brand)
+                        ? selectedBrands.filter(b => b !== brand)
+                        : [...selectedBrands, brand])}
+                      className="mr-2"
+                    />
+                    {brand} <span className="ml-1 text-muted-foreground">({products.filter(p => p.brand === brand).length})</span>
+                  </label>
+                ))}
+                {brandOptions.length > 5 && (
+                  <button className="text-xs text-primary mt-1" onClick={() => setShowAllBrands(v => !v)}>
+                    {showAllBrands ? 'Show Less' : `\t${brandOptions.length - 5} More`}
                 </button>
-              </Badge>
-            )}
-            {selectedCategory !== "all" && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Category: {selectedCategory}
-                <button onClick={() => setSelectedCategory("all")} className="ml-1 hover:text-destructive">
-                  ×
+                )}
+              </div>
+              {/* Gender Filter */}
+              <div className="mb-6">
+                <div className="font-semibold text-sm mb-2">Gender</div>
+                {(showAllGenders ? genderOptions : genderOptions.slice(0, 5)).map(gender => (
+                  <label key={gender} className="flex items-center mb-1 cursor-pointer text-sm">
+                    <input
+                      type="checkbox"
+                      checked={selectedGenders.includes(gender)}
+                      onChange={() => setSelectedGenders(selectedGenders.includes(gender)
+                        ? selectedGenders.filter(g => g !== gender)
+                        : [...selectedGenders, gender])}
+                      className="mr-2"
+                    />
+                    {gender.charAt(0).toUpperCase() + gender.slice(1)} <span className="ml-1 text-muted-foreground">({products.filter(p => p.gender === gender).length})</span>
+                  </label>
+                ))}
+                {genderOptions.length > 5 && (
+                  <button className="text-xs text-primary mt-1" onClick={() => setShowAllGenders(v => !v)}>
+                    {showAllGenders ? 'Show Less' : `\t${genderOptions.length - 5} More`}
                 </button>
-              </Badge>
-            )}
-            {selectedSubcategory !== "all" && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Subcategory: {selectedSubcategory}
-                <button onClick={() => setSelectedSubcategory("all")} className="ml-1 hover:text-destructive">
-                  ×
-                </button>
-              </Badge>
-            )}
-            {selectedBrand !== "all" && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Brand: {selectedBrand}
-                <button onClick={() => setSelectedBrand("all")} className="ml-1 hover:text-destructive">
-                  ×
-                </button>
-              </Badge>
-            )}
-            {selectedGender !== "all" && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Gender: {selectedGender}
-                <button onClick={() => setSelectedGender("all")} className="ml-1 hover:text-destructive">
-                  ×
-                </button>
-              </Badge>
             )}
           </div>
-
+            </aside>
+            {/* Product Grid */}
+            <main className="flex-1 min-w-0">
+              {/* Search Bar */}
+              <div className="mb-6">
+                <Input
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+              </div>
           {/* Results Count */}
-          <div className="mb-6">
+              <div className="mb-4">
             <p className="text-sm text-muted-foreground">
-              Showing {products.length} products
+                  Showing {filteredProducts.length} products
             </p>
           </div>
-
-          {/* Loading State */}
-          {loading && (
+              {/* Products Grid */}
+              {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
               <span className="ml-2 text-lg">Loading products...</span>
             </div>
-          )}
-
-          {/* Error State */}
-          {error && !loading && (
+              ) : error ? (
             <div className="text-center py-12">
               <p className="text-lg font-medium mb-2 text-red-600">Error loading products</p>
               <p className="text-muted-foreground mb-4">{error}</p>
-              <Button
-                onClick={() => {
-                  setSearchQuery("")
-                  setSelectedCategory("all")
-                  setSortBy("name")
-                }}
-              >
-                Try Again
-              </Button>
+                  <Button onClick={() => { setSearchQuery(""); setSelectedCategories([]); setSortBy("name"); }}>Try Again</Button>
             </div>
-          )}
-
-          {/* Products Grid */}
-          {!loading && !error && products.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
+              ) : filteredProducts.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-x-auto min-w-0">
+                  {filteredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-          )}
-
-          {/* No Products State */}
-          {!loading && !error && products.length === 0 && (
+              ) : (
             <div className="text-center py-12">
               <p className="text-lg font-medium mb-2">No products found</p>
               <p className="text-muted-foreground mb-4">Try adjusting your search or filter criteria</p>
-              <Button
-                onClick={() => {
-                  setSearchQuery("")
-                  setSelectedCategory("all")
-                  setSelectedSubcategory("all")
-                  setSelectedBrand("all")
-                  setSelectedGender("all")
-                  setSortBy("name")
-                }}
-              >
-                Clear Filters
-              </Button>
+                  <Button onClick={() => { setSearchQuery(""); setSelectedCategories([]); setSelectedSubcategories([]); setSelectedBrands([]); setSelectedGenders([]); setSortBy("name"); }}>Clear Filters</Button>
             </div>
           )}
+            </main>
+          </div>
         </div>
       </div>
-
       <Footer />
     </div>
   )

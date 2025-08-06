@@ -8,6 +8,8 @@ export interface Product {
   id: string
   name: string
   price: number
+  mrp: number // Original MRP price
+  discountPercentage: number // Discount percentage (0-100)
   image: string
   images?: string[] // Array of all product images
   category: string

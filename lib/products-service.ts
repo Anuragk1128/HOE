@@ -5,6 +5,8 @@ interface BackendProduct {
   _id: string;
   name: string;
   price: number;
+  mrp: number;
+  discountPercentage: number;
   description: string;
   image: string[];
   category: string;
@@ -40,6 +42,8 @@ const convertBackendProduct = (backendProduct: BackendProduct): Product => {
     id: backendProduct._id, // Use the MongoDB ObjectId string as ID
     name: backendProduct.name,
     price: backendProduct.price,
+    mrp: backendProduct.mrp || backendProduct.price, // Use MRP if available, fallback to price
+    discountPercentage: backendProduct.discountPercentage || 0, // Use discount percentage, default to 0
     image: backendProduct.image[0] || "/placeholder.svg", // Use first image as main image
     images: backendProduct.image, // Include all images
     category: backendProduct.category,

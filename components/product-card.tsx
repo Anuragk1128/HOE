@@ -165,8 +165,13 @@ export function ProductCard({ product }: ProductCardProps) {
             </p>
           ) : null}
           
-          {/* Only show price */}
-          <p className="font-bold text-primary text-lg">{formatPrice(product.price)}</p>
+          {/* Price with discount */}
+          <div className="flex items-center gap-2">
+            <p className="font-bold text-primary text-lg">{formatPrice(product.price)}</p>
+            {product.discountPercentage > 0 && product.mrp > product.price && (
+              <p className="text-sm text-muted-foreground line-through">{formatPrice(product.mrp)}</p>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
