@@ -187,6 +187,8 @@ export const createProduct = async (req, res) => {
         const {
             name,
             price,
+            mrp,
+            discountPercentage,
             description,
             category,
             subcategory,
@@ -227,8 +229,14 @@ export const createProduct = async (req, res) => {
         }
 
         // Validate required fields
-        if (!name || !price || !description || !category || !subcategory || !brand || !gender || !stock || !rating) {
+        if (!name || !price || !mrp || !description || !category || !subcategory || !brand || !gender || !stock || !rating) {
             return res.status(400).json({ message: "All required fields must be provided" });
+        }
+
+        // Validate discount percentage
+        const discountPercent = Number(discountPercentage) || 0;
+        if (discountPercent < 0 || discountPercent > 100) {
+            return res.status(400).json({ message: "Discount percentage must be between 0 and 100" });
         }
 
         // Validate sizes and colors only for sportswear
@@ -255,6 +263,8 @@ export const createProduct = async (req, res) => {
         const productData = {
             name,
             price: Number(price),
+            mrp: Number(mrp),
+            discountPercentage: discountPercent,
             description,
             image: imageUrls,
             category,
@@ -334,6 +344,8 @@ export const updateProduct = async (req, res) => {
         const {
             name,
             price,
+            mrp,
+            discountPercentage,
             description,
             category,
             subcategory,
@@ -375,8 +387,14 @@ export const updateProduct = async (req, res) => {
         }
 
         // Validate required fields
-        if (!name || !price || !description || !category || !subcategory || !brand || !gender || !stock || !rating) {
+        if (!name || !price || !mrp || !description || !category || !subcategory || !brand || !gender || !stock || !rating) {
             return res.status(400).json({ message: "All required fields must be provided" });
+        }
+
+        // Validate discount percentage
+        const discountPercent = Number(discountPercentage) || 0;
+        if (discountPercent < 0 || discountPercent > 100) {
+            return res.status(400).json({ message: "Discount percentage must be between 0 and 100" });
         }
 
         // Validate sizes and colors only for sportswear
@@ -398,6 +416,8 @@ export const updateProduct = async (req, res) => {
         const updateData = {
             name,
             price: Number(price),
+            mrp: Number(mrp),
+            discountPercentage: discountPercent,
             description,
             category,
             subcategory,

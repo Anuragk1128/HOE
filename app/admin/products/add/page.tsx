@@ -7,6 +7,8 @@ import Link from "next/link";
 interface ProductFormData {
   name: string;
   price: number;
+  mrp: number;
+  discountPercentage: number;
   description: string;
   image: File[];
   category: string;
@@ -40,6 +42,8 @@ export default function AddProductPage() {
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     price: 0,
+    mrp: 0,
+    discountPercentage: 0,
     description: "",
     image: [],  // Now stores File objects
     category: "",
@@ -171,6 +175,8 @@ export default function AddProductPage() {
     
     if (!formData.name.trim()) missingFields.push("Product Name");
     if (!formData.price || formData.price <= 0) missingFields.push("Price");
+    if (!formData.mrp || formData.mrp <= 0) missingFields.push("MRP");
+    if (formData.discountPercentage < 0 || formData.discountPercentage > 100) missingFields.push("Discount Percentage");
     if (!formData.description.trim()) missingFields.push("Description");
     if (formData.image.length === 0) missingFields.push("Product Images");
     if (!formData.category) missingFields.push("Category");
@@ -194,6 +200,8 @@ export default function AddProductPage() {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("price", formData.price.toString());
+      formDataToSend.append("mrp", formData.mrp.toString());
+      formDataToSend.append("discountPercentage", formData.discountPercentage.toString());
       formDataToSend.append("description", formData.description);
       formDataToSend.append("category", formData.category);
       formDataToSend.append("subcategory", formData.subcategory);
@@ -480,6 +488,51 @@ export default function AddProductPage() {
               />
               {(!formData.price || formData.price <= 0) && (
                 <p className="mt-1 text-sm text-red-600">Price must be greater than 0</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                MRP (₹) *
+              </label>
+              <input
+                type="number"
+                name="mrp"
+                value={formData.mrp}
+                onChange={handleInputChange}
+                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  !formData.mrp || formData.mrp <= 0 ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="0"
+                min="0"
+                step="0.01"
+                required
+              />
+              {(!formData.mrp || formData.mrp <= 0) && (
+                <p className="mt-1 text-sm text-red-600">MRP must be greater than 0</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Discount Percentage (%) *
+              </label>
+              <input
+                type="number"
+                name="discountPercentage"
+                value={formData.discountPercentage}
+                onChange={handleInputChange}
+                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  formData.discountPercentage < 0 || formData.discountPercentage > 100 ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="0"
+                min="0"
+                max="100"
+                step="0.01"
+                required
+              />
+              {(formData.discountPercentage < 0 || formData.discountPercentage > 100) && (
+                <p className="mt-1 text-sm text-red-600">Discount percentage must be between 0 and 100</p>
               )}
             </div>
 

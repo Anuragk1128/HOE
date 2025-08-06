@@ -53,7 +53,17 @@ export function ProductDetail({ product }: ProductDetailProps) {
               {product.category}
             </Badge>
             <h1 className="font-playfair text-3xl font-bold mb-2">{product.name}</h1>
-            <p className="text-2xl font-semibold text-primary">{formatPrice(product.price)}</p>
+            <div className="flex items-center gap-3 mb-2">
+              <p className="text-2xl font-semibold text-primary">{formatPrice(product.price)}</p>
+              {product.discountPercentage > 0 && product.mrp > product.price && (
+                <>
+                  <p className="text-lg text-muted-foreground line-through">{formatPrice(product.mrp)}</p>
+                  <Badge variant="destructive" className="text-xs">
+                    {product.discountPercentage}% OFF
+                  </Badge>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Category-specific specifications */}
