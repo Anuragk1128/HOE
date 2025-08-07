@@ -9,6 +9,7 @@ import type { Product } from "@/contexts/cart-context"
 import { useCart } from "@/contexts/cart-context"
 import Image from "next/image"
 import ImageZoomModal from "@/components/ImageZoomModal"
+import { PinCodeChecker } from "@/components/PinCodeChecker"
 
 interface ProductDetailProps {
   product: Product
@@ -143,34 +144,38 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <label className="text-sm font-medium">Quantity:</label>
-                <div className="flex items-center border rounded-md">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="px-4 py-2 text-sm font-medium">{quantity}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <Button onClick={handleAddToCart} className="w-full" size="lg">
-                <ShoppingBag className="mr-2 h-5 w-5" />
-                Add to Cart
-              </Button>
-            </div>
+  <div className="flex justify-end">
+    <div className="w-full max-w-xs">
+      <PinCodeChecker />
+    </div>
+  </div>
+  <div className="flex items-center space-x-4">
+    <label className="text-sm font-medium">Quantity:</label>
+    <div className="flex items-center border rounded-md">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+        className="h-8 w-8 p-0"
+      >
+        <Minus className="h-4 w-4" />
+      </Button>
+      <span className="px-4 py-2 text-sm font-medium">{quantity}</span>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setQuantity(quantity + 1)}
+        className="h-8 w-8 p-0"
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+    </div>
+  </div>
+  <Button onClick={handleAddToCart} className="w-full" size="lg">
+    <ShoppingBag className="mr-2 h-5 w-5" />
+    Add to Cart
+  </Button>
+</div>
           </div>
         </div>
       </div>
