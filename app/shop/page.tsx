@@ -7,6 +7,9 @@ import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 import { getProductsWithFilters } from "@/lib/products-service"
 import type { Product } from "@/contexts/cart-context"
@@ -22,6 +25,17 @@ export default function Shop() {
   const [showAllSubcategories, setShowAllSubcategories] = useState(false)
   const [showAllBrands, setShowAllBrands] = useState(false)
   const [showAllGenders, setShowAllGenders] = useState(false)
+  
+  // Price filtering
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
+  const [maxPrice, setMaxPrice] = useState(10000)
+  
+  // Attribute filtering
+  const [selectedMetalTypes, setSelectedMetalTypes] = useState<string[]>([])
+  const [selectedStoneTypes, setSelectedStoneTypes] = useState<string[]>([])
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([])
+  const [selectedFitTypes, setSelectedFitTypes] = useState<string[]>([])
+  const [selectedActivityTypes, setSelectedActivityTypes] = useState<string[]>([])
   const [sortBy, setSortBy] = useState("name")
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,6 +46,24 @@ export default function Shop() {
   const subcategoryOptions = Array.from(new Set(products.map(p => p.subcategory))).filter(Boolean)
   const brandOptions = Array.from(new Set(products.map(p => p.brand))).filter(Boolean)
   const genderOptions = Array.from(new Set(products.map(p => p.gender))).filter(Boolean)
+  
+  // Price range calculation
+  useState(() => {
+    const prices = products.map(p => p.price).filter(Boolean)
+    if (prices.length > 0) {
+      const min = Math.min(...prices)
+      const max = Math.max(...prices)
+      setMaxPrice(max)
+      setPriceRange([min, max])
+    }
+  })
+  
+  // Attribute filter options
+  const metalTypeOptions = Array.from(new Set(products.filter(p => p.category === 'jewellery').map(p => p.jewelleryAttributes?.metalType).filter((metalType): metalType is string => Boolean(metalType))))
+  const stoneTypeOptions = Array.from(new Set(products.filter(p => p.category === 'jewellery').map(p => p.jewelleryAttributes?.stoneType).filter((stoneType): stoneType is string => Boolean(stoneType))))
+  const materialOptions = Array.from(new Set(products.filter(p => p.category === 'sportswear').map(p => p.sportswearAttributes?.material).filter(Boolean))) as string[]
+  const fitTypeOptions = Array.from(new Set(products.filter(p => p.category === 'sportswear').map(p => p.sportswearAttributes?.fitType).filter((fitType): fitType is string => Boolean(fitType))))
+  const activityTypeOptions = Array.from(new Set(products.filter(p => p.category === 'sportswear').map(p => p.sportswearAttributes?.activityType).filter(Boolean))) as string[]
 
   // Fetch products from backend
   useEffect(() => {
@@ -60,7 +92,26 @@ export default function Shop() {
     const matchesSubcategory = selectedSubcategories.length === 0 || selectedSubcategories.includes(product.subcategory)
     const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brand)
     const matchesGender = selectedGenders.length === 0 || selectedGenders.includes(product.gender)
-    return matchesCategory && matchesSubcategory && matchesBrand && matchesGender
+    
+    // Price filtering
+    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1]
+    
+    // Attribute filtering for jewellery
+    const matchesMetalType = selectedMetalTypes.length === 0 || 
+      (product.jewelleryAttributes?.metalType && selectedMetalTypes.includes(product.jewelleryAttributes.metalType))
+    const matchesStoneType = selectedStoneTypes.length === 0 || 
+      (product.jewelleryAttributes?.stoneType && selectedStoneTypes.includes(product.jewelleryAttributes.stoneType))
+    
+    // Attribute filtering for sportswear
+    const matchesMaterial = selectedMaterials.length === 0 || 
+      (product.sportswearAttributes?.material && selectedMaterials.includes(product.sportswearAttributes.material))
+    const matchesFitType = selectedFitTypes.length === 0 || 
+      (product.sportswearAttributes?.fitType && selectedFitTypes.includes(product.sportswearAttributes.fitType))
+    const matchesActivityType = selectedActivityTypes.length === 0 || 
+      (product.sportswearAttributes?.activityType && selectedActivityTypes.includes(product.sportswearAttributes.activityType))
+    
+    return matchesCategory && matchesSubcategory && matchesBrand && matchesGender && matchesPrice && 
+           matchesMetalType && matchesStoneType && matchesMaterial && matchesFitType && matchesActivityType
   })
 
   return (
@@ -92,6 +143,12 @@ export default function Shop() {
                   setSelectedSubcategories([])
                   setSelectedBrands([])
                   setSelectedGenders([])
+                  setPriceRange([0, maxPrice])
+                  setSelectedMetalTypes([])
+                  setSelectedStoneTypes([])
+                  setSelectedMaterials([])
+                  setSelectedFitTypes([])
+                  setSelectedActivityTypes([])
                 }}>CLEAR ALL</button>
               </div>
               {/* Category Filter */}
@@ -182,6 +239,122 @@ export default function Shop() {
                 </button>
             )}
           </div>
+              
+              {/* Price Range Filter */}
+              <div className="mb-6">
+                <div className="font-semibold text-sm mb-2">Price Range</div>
+                <div className="px-2">
+                  <Slider
+                    value={priceRange}
+                    onValueChange={(value) => setPriceRange(value as [number, number])}
+                    max={maxPrice}
+                    min={0}
+                    step={100}
+                    className="w-full mb-2"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>₹{priceRange[0]}</span>
+                    <span>₹{priceRange[1]}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Jewellery Attributes */}
+              {metalTypeOptions.length > 0 && (
+                <div className="mb-6">
+                  <div className="font-semibold text-sm mb-2">Metal Type</div>
+                  {metalTypeOptions.map(metalType => (
+                    <label key={metalType} className="flex items-center mb-1 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedMetalTypes.includes(metalType)}
+                        onChange={() => setSelectedMetalTypes(selectedMetalTypes.includes(metalType)
+                          ? selectedMetalTypes.filter(m => m !== metalType)
+                          : [...selectedMetalTypes, metalType])}
+                        className="mr-2"
+                      />
+                      {metalType} <span className="ml-1 text-muted-foreground">({products.filter(p => p.jewelleryAttributes?.metalType === metalType).length})</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              
+              {stoneTypeOptions.length > 0 && (
+                <div className="mb-6">
+                  <div className="font-semibold text-sm mb-2">Stone Type</div>
+                  {stoneTypeOptions.map(stoneType => (
+                    <label key={stoneType} className="flex items-center mb-1 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedStoneTypes.includes(stoneType)}
+                        onChange={() => setSelectedStoneTypes(selectedStoneTypes.includes(stoneType)
+                          ? selectedStoneTypes.filter(s => s !== stoneType)
+                          : [...selectedStoneTypes, stoneType])}
+                        className="mr-2"
+                      />
+                      {stoneType} <span className="ml-1 text-muted-foreground">({products.filter(p => p.jewelleryAttributes?.stoneType === stoneType).length})</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              
+              {/* Sportswear Attributes */}
+              {materialOptions.length > 0 && (
+                <div className="mb-6">
+                  <div className="font-semibold text-sm mb-2">Material</div>
+                  {materialOptions.map(material => (
+                    <label key={material} className="flex items-center mb-1 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedMaterials.includes(material)}
+                        onChange={() => setSelectedMaterials(selectedMaterials.includes(material)
+                          ? selectedMaterials.filter(m => m !== material)
+                          : [...selectedMaterials, material])}
+                        className="mr-2"
+                      />
+                      {material} <span className="ml-1 text-muted-foreground">({products.filter(p => p.sportswearAttributes?.material === material).length})</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              
+              {fitTypeOptions.length > 0 && (
+                <div className="mb-6">
+                  <div className="font-semibold text-sm mb-2">Fit Type</div>
+                  {fitTypeOptions.map(fitType => (
+                    <label key={fitType} className="flex items-center mb-1 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedFitTypes.includes(fitType)}
+                        onChange={() => setSelectedFitTypes(selectedFitTypes.includes(fitType)
+                          ? selectedFitTypes.filter(f => f !== fitType)
+                          : [...selectedFitTypes, fitType])}
+                        className="mr-2"
+                      />
+                      {fitType} <span className="ml-1 text-muted-foreground">({products.filter(p => p.sportswearAttributes?.fitType === fitType).length})</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              
+              {activityTypeOptions.length > 0 && (
+                <div className="mb-6">
+                  <div className="font-semibold text-sm mb-2">Activity Type</div>
+                  {activityTypeOptions.map(activityType => (
+                    <label key={activityType} className="flex items-center mb-1 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedActivityTypes.includes(activityType)}
+                        onChange={() => setSelectedActivityTypes(selectedActivityTypes.includes(activityType)
+                          ? selectedActivityTypes.filter(a => a !== activityType)
+                          : [...selectedActivityTypes, activityType])}
+                        className="mr-2"
+                      />
+                      {activityType} <span className="ml-1 text-muted-foreground">({products.filter(p => p.sportswearAttributes?.activityType === activityType).length})</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </aside>
             {/* Product Grid */}
             <main className="flex-1 min-w-0">
