@@ -9,6 +9,7 @@ import adminProductRouter from "./routes/adminProductRoute.js";
 import adminWebsiteImageRouter from "./routes/adminWebsiteImageRoute.js";
 import websiteImageRouter from "./routes/websiteImageRoute.js";
 import productRouter from "./routes/productRoute.js";
+import pincodeRouter from "./routes/pincodeRoute.js";
 import specs from "./swagger.js";
 
 const app = express();
@@ -54,6 +55,7 @@ app.use("/api/admin", adminProductRouter);
 app.use("/api/admin", adminWebsiteImageRouter);
 app.use("/api", websiteImageRouter);
 app.use("/api", productRouter);
+app.use("/api/pincode", pincodeRouter);
 
 app.get("/", (req, res) => {
     res.send("Api is working");
